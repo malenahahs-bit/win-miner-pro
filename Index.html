@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WIN-MINER-PRO - Industrial Mining Command Center</title>
+    
+    <!-- FIREBASE SDK (Versión Compat para HTML plano) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <!-- ESTILOS CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- OVERLAY DE REGISTRO E INICIO DE SESIÓN -->
+    <div class="auth-overlay" id="authOverlay">
+        <canvas id="coinsCanvasAuth" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:-1; opacity:0.85;"></canvas>
+        <div class="auth-card" id="loginCard">
+            <h2 id="authTitle">WIN-MINER-PRO</h2>
+            <p id="authSubtitle" style="color:var(--text-muted); margin-bottom:20px; font-size:12px;">Acceso al Panel de Comando Industrial</p>
+            <div class="auth-error" id="authErrorMsg">Error de credenciales.</div>
+            
+            <div class="verification-container" id="verificationBlock">
+                <div class="tech-spinner-wrapper">
+                    <div class="tech-spinner-ring1" id="tsRing1"></div>
+                    <div class="tech-spinner-ring2" id="tsRing2"></div>
+                    <div class="tech-spinner-core" id="tsCore">₿</div>
+                </div>
+                <div class="verification-text" id="verifStatusTitle">ENCRIPTANDO DATOS...</div>
+                <div class="verification-subtext" id="verifStatusDesc">Procesando llaves de seguridad.</div>
+            </div>
+
+            <input type="text" id="authName" class="auth-input register-only" placeholder="Nombres del Inversor">
+            <input type="text" id="authLastName" class="auth-input register-only" placeholder="Apellidos del Inversor">
+            <input type="text" id="authDni" class="auth-input register-only" placeholder="Cédula de Identidad o DNI">
+            <input type="tel" id="authPhone" class="auth-input register-only" placeholder="Teléfono Móvil (Con código de país)">
+            <input type="email" id="authEmail" class="auth-input" placeholder="Correo Electrónico">
+            <input type="password" id="authPassword" class="auth-input" placeholder="Contraseña Segura">
+            
+            <div class="tc-checkbox-container register-only" id="tcContainer" style="display: none;">
+                <input type="checkbox" id="tcCheckbox">
+                <label for="tcCheckbox">He leído, comprendo y acepto irrevocablemente los <span class="tc-link" onclick="document.getElementById('tcModalOverlay').style.display='flex'">Términos y Condiciones Contractuales</span>.</label>
+            </div>
+
+            <button class="auth-btn" id="authActionButton" onclick="loginUser()">Iniciar Sesión</button>
+            
+            <div class="auth-switch-wrapper auth-switch">
+                <span class="auth-switch-text" id="authSwitchPrompt">¿Aún no tienes una cuenta de inversor?</span>
+                <button class="auth-switch-btn" id="authSwitchBtn" onclick="toggleAuthMode()">Crear Cuenta Ahora ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE TÉRMINOS Y CONDICIONES (KYC) -->
+    <div class="tc-modal-overlay" id="tcModalOverlay">
+        <div class="tc-modal">
+            <h3>Términos y Condiciones Legales</h3>
+            <div class="tc-content">
+                <strong>1. ACEPTACIÓN DE LOS TÉRMINOS Y RIESGO DE INVERSIÓN</strong><br>
+                El registro y uso de la plataforma WIN-MINER-PRO implica la aceptación total, incondicional e irrevocable de los presentes términos. Esta plataforma opera bajo esquemas de rendimiento criptográfico. Usted comprende y acepta que toda inversión conlleva riesgos. La empresa no asegura retornos fijos garantizados ante eventos catastróficos del mercado.<br><br>
+                <strong>2. NATURALEZA DEL SERVICIO Y MINADO EN LA NUBE</strong><br>
+                El proceso de minado ofrecido se ejecuta exclusivamente en la nube web, utilizando protocolos de enlace que simulan y derivan algoritmos matemáticos a través de un puente de conexión con la placa base de su ordenador o dispositivo móvil.<br><br>
+                <strong>3. POLÍTICAS ESTRICTAS DE KYC (KNOW YOUR CUSTOMER)</strong><br>
+                La administración se reserva el derecho unilateral y absoluto de exigir una verificación de identidad (KYC) exhaustiva en cualquier momento. Si los datos proporcionados en este registro NO coinciden de manera exacta con los documentos de identidad, el usuario PERDERÁ DE FORMA IRREVERSIBLE toda su inversión inicial.<br><br>
+                <strong>4. SEGURIDAD DE LA CUENTA</strong><br>
+                Queda terminantemente prohibido y deshabilitado el cambio de correo electrónico o contraseña una vez creada la cuenta.
+            </div>
+            <button class="btn-action save-btn" onclick="document.getElementById('tcModalOverlay').style.display='none'" style="font-size:14px; padding:15px; margin-top:0;">HE LEÍDO Y ACEPTO LAS CONDICIONES</button>
+        </div>
+    </div>
+
+    <canvas id="matrixCanvas"></canvas>
+
+    <!-- MODAL GENERAL (Usado para Pagos, 2FA, Ads) -->
+    <div class="modal-overlay" id="paymentOverlay">
+        <div class="payment-modal">
+            <div id="paymentInputArea">
+                <h3 id="modalPlanName">Desbloquear Plan</h3>
+                <div class="cost-display">Monto: $<span id="modalPlanCost">0</span> USD</div>
+                <div class="input-group">
+                    <label>Seleccionar Red de Pago</label>
+                    <select class="payment-select" id="cryptoNetworkSelect" onchange="updateWalletAddressModal()">
+                        <option value="USDT">USDT (TRC 20)</option>
+                        <option value="BTC">Bitcoin (BTC)</option>
+                        <option value="ETH">Ethereum (ERC 20)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Dirección de Envío (Copia esto)</label>
+                    <input type="text" class="wallet-input" id="walletAddressDisplayModal" readonly value="TNCFjTLYp63k2ocAooAnTUJbodaWLrRQhh">
+                </div>
+                <div class="modal-btns">
+                    <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                    <button class="btn-confirm" id="btnVerifyPayment" onclick="processPayment()">Recargar y Activar</button>
+                </div>
+            </div>
+
+            <div id="tfaArea" style="display:none;" class="tfa-modal">
+                <h3 style="color:var(--danger)">Seguridad Bancaria 2FA</h3>
+                <p style="font-size:12px; color:var(--text-muted);">Para autorizar este retiro, ingrese el código de 6 dígitos de su aplicación Google Authenticator.</p>
+                <input type="text" id="tfaCode" class="tfa-input" maxlength="6" placeholder="000000">
+                <div class="modal-btns">
+                    <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                    <button class="btn-confirm" onclick="verify2FA()">Verificar y Retirar</button>
+                </div>
+            </div>
+
+            <div id="adArea" style="display:none; text-align:center;">
+                <h3 style="color:var(--primary)">Potenciando Hardware...</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Visualizando conexión publicitaria cifrada. Por favor espere para recibir la potencia de Hash.</p>
+                <div class="payment-spinner" style="border-left-color: var(--primary);"></div>
+                <p id="adTimerText" style="font-size:24px; font-weight:bold; color:#fff;">10</p>
+            </div>
+
+            <div id="paymentStatusArea">
+                <div class="payment-spinner" id="paymentSpinner"></div>
+                <div id="paymentSuccessIcon">✅</div>
+                <p id="paymentStatusText">Procesando...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENEDORES FLOTANTES -->
+    <div id="toast-container"></div>
+    <div id="fomo-container"></div>
+    
+    <!-- PANTALLA DE MANTENIMIENTO DEL ADMINISTRADOR -->
+    <div class="maintenance-overlay" id="maintenanceOverlay">
+        <div class="maintenance-spinner"></div>
+        <h1>SISTEMA EN MANTENIMIENTO</h1>
+        <p style="font-size: 16px; font-weight: bold; color: var(--text-main);">
+            Sistema cerrado por mantenimiento.<br><br>
+            <span style="color: var(--success);">No te preocupes, tus mineros se mantienen trabajando al día al 100%.</span>
+        </p>
+    </div>
+
+    <div id="moneyRainContainer"></div>
+
+    <div class="social-ticker">
+        <span style="color:var(--primary)">🔴 LIVE</span>
+        <span class="ticker-text" id="socialTicker">Cargando actividad de la red...</span>
+    </div>
+
+    <!-- Modal Sistema de Referidos -->
+    <div class="modal-overlay" id="referralModal">
+        <div class="payment-modal" style="width: 500px; max-width: 95%;">
+            <h3 style="color:var(--primary); text-align:center; margin-bottom: 5px;">Red de Afiliados Multinivel</h3>
+            <p style="font-size:11px; color:var(--text-muted); text-align:center; margin-bottom:20px;">Gane comisiones en 3 niveles de profundidad por las inversiones de su red.</p>
+            
+            <div class="ref-card">
+                <span style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Tu Enlace de Invitación (ID: <strong id="refUserIdDisplay" style="color:white;">---</strong>)</span>
+                <div class="ref-link-box">
+                    <input type="text" id="refLinkInput" class="ref-input" readonly value="https://app.quantumhash.com/register?ref=---">
+                    <button class="ref-btn" onclick="copyRefLink()">COPIAR</button>
+                </div>
+            </div>
+
+            <h4 style="font-size: 12px; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase;">Estadísticas de su Red</h4>
+            <div class="ref-levels">
+                <div class="ref-level-box">
+                    <span>Nivel 1 (10%)</span>
+                    <strong id="refCount1">0</strong>
+                    <span class="ref-earn" id="refEarn1">+$0.00</span>
+                </div>
+                <div class="ref-level-box">
+                    <span>Nivel 2 (5%)</span>
+                    <strong id="refCount2">0</strong>
+                    <span class="ref-earn" id="refEarn2">+$0.00</span>
+                </div>
+                <div class="ref-level-box">
+                    <span>Nivel 3 (2%)</span>
+                    <strong id="refCount3">0</strong>
+                    <span class="ref-earn" id="refEarn3">+$0.00</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Ganancia Total de Afiliados</span><br>
+                <strong style="color:var(--success); font-size:24px; font-family:monospace;" id="refTotalEarn">$0.00 USD</strong>
+            </div>
+
+            <button class="btn-cancel" onclick="document.getElementById('referralModal').style.display='none'" style="width:100%; margin-top:20px;">Cerrar Panel</button>
+        </div>
+    </div>
+
+    <!-- Modal Ruleta Diaria -->
+    <div class="modal-overlay" id="rouletteModal">
+        <div class="payment-modal" style="text-align: center; width: 350px;">
+            <h3 style="color:var(--primary); font-size: 20px;">Giro Diario de la Suerte</h3>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">Los premios mayores son acreditados directamente a su billetera. Suerte.</p>
+            
+            <div class="roulette-container">
+                <div class="roulette-marker"></div>
+                <div class="roulette-wheel" id="rouletteWheel">
+                    <span class="r-label l-win">+0.05 TH/s</span>
+                    <span class="r-label l-lose1">Vacío</span>
+                    <span class="r-label l-big1">$500 USD</span>
+                    <span class="r-label l-mid">$50 USD</span>
+                    <span class="r-label l-big2">$1000 USD</span>
+                    <span class="r-label l-lose2">Vacío</span>
+                </div>
+                <div class="roulette-center">🎰</div>
+            </div>
+
+            <button class="btn-boost" id="btnSpin" onclick="spinRoulette()" style="width:100%; background:linear-gradient(45deg, #10b981, #047857); padding: 15px; font-size: 14px;">TIRAR DE LA RULETA</button>
+            <button class="btn-cancel" onclick="document.getElementById('rouletteModal').style.display='none'" style="width:100%; margin-top:10px;">Cerrar Panel</button>
+        </div>
+    </div>
+
+    <div class="dashboard" style="padding-bottom: 40px;">
+        <!-- PANEL IZQUIERDO -->
+        <div class="card balance-card">
+            <div class="panel-header"><h2>Comandos de Cartera</h2></div>
+            <div class="panel-content">
+                <div class="crypto-selector">
+                    <button class="crypto-btn active" onclick="changeCoin('BTC')" id="btn-BTC">BTC</button>
+                    <button class="crypto-btn" onclick="changeCoin('LTC')" id="btn-LTC">LTC</button>
+                    <button class="crypto-btn" onclick="changeCoin('DASH')" id="btn-DASH">DASH</button>
+                </div>
+                
+                <div class="balance-main">
+                    <p class="label" id="balanceLabel">Saldo Minado (BTC)</p>
+                    <div class="amount" id="cryptoBalance">0.00000000</div>
+                    <div class="usd">≈ $<span id="usdBalance">0.00</span> USD</div>
+                    <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Minero Activo:</span><br>
+                        <strong id="balanceActiveMiner" style="color: var(--primary); font-size: 13px;">Básico Sim Rig</strong>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span>Progreso de Retiro</span>
+                        <span>$<span id="progCurrent">0.00</span> / $<span id="progTarget">10.00</span></span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progFill"></div>
+                    </div>
+                    <div class="gas-fee-label" id="gasFeeDisplay">Comisión de Red (Gas Fee): 15%</div>
+                </div>
+
+                <div class="withdraw-config">
+                    <h3>Método de Retiro (Destino)</h3>
+                    <div class="input-group">
+                        <label>Red (Network)</label>
+                        <select class="payment-select" id="wdNetworkSelect"></select>
+                    </div>
+                    <div class="input-group">
+                        <label>Dirección de Billetera</label>
+                        <input type="text" class="wallet-input" id="wdWalletAddress" placeholder="Pega tu dirección aquí">
+                    </div>
+                    <button class="btn-action save-btn" onclick="saveWithdrawMethod()">Guardar Billetera</button>
+                </div>
+
+                <button class="btn-action withdraw" onclick="initiateWithdraw()" style="margin-bottom: 20px;">Retirar Fondos</button>
+                
+                <button class="btn-logout" onclick="logoutUser()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+
+        <!-- PANEL CENTRAL -->
+        <div class="central-panel-grid">
+            <div class="card hardware-card" style="flex: none;">
+                <div class="panel-header">
+                    <h2>Estado de Rig Principal</h2>
+                    <div id="activePlanDisplay" style="color:var(--text-muted)">Rig: Básico Sim</div>
+                </div>
+                <div class="panel-content">
+                   <div class="rig-visual-panel">
+                        <div class="cortex-module" style="position: relative;">
+                            
+                            <div id="minerActivationOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 7, 10, 0.9); z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
+                                <h3 style="color: var(--danger); margin-bottom: 10px; font-size: 16px; letter-spacing: 1px;">SISTEMA INACTIVO</h3>
+                                <p style="color: var(--text-muted); font-size: 11px; margin-bottom: 20px;">Presione el botón para encender los servidores H-Core.</p>
+                                <button class="btn-boost" style="background: linear-gradient(45deg, #10b981, #047857); box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);" onclick="turnOnMiner()">
+                                    ▶ INICIAR MINERÍA
+                                </button>
+                            </div>
+
+                            <div class="video-avatar-container">
+                                <div class="rotating-mining-card" id="basicPlanCard">
+                                    <div class="card-inner">
+                                        <div class="card-front">₿</div>
+                                        <div class="card-back">ACTIVO</div>
+                                    </div>
+                                </div>
+                                <div id="videoErrorMsg">⚠️ Error: No se encuentra el video</div>
+                                <video id="minerVideo" src="" autoplay loop muted playsinline></video>
+                                <div class="video-overlay-scanline"></div>
+                            </div>
+
+                            <div class="h-meter-advanced">
+                                <div class="h-meter-title">H-Core Engine</div>
+                                <svg viewBox="0 0 100 50" class="gauge-svg">
+                                    <defs>
+                                        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#ef4444" />
+                                            <stop offset="50%" stop-color="#f7931a" />
+                                            <stop offset="100%" stop-color="#10b981" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M 10 45 A 35 35 0 0 1 90 45" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8" stroke-linecap="round"/>
+                                    <path d="M 10 45 A 35 35 0 0 1 90 45" fill="none" stroke="url(#grad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="110" stroke-dashoffset="30" id="hMeterFill"/>
+                                    <polygon points="48,48 52,48 50,15" fill="#fff" id="hMeterNeedleSvg" style="transform-origin: 50px 45px; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);"/>
+                                </svg>
+                            </div>
+
+                            <div class="hardware-core-label">
+                                <strong style="color: #fff">Quantum Rig</strong> <span id="coreStatusLabel">[ACTIVE]</span>
+                            </div>
+                        </div>
+
+                        <button class="btn-boost" id="btnAdBoost" onclick="watchAdForBoost()">
+                            ⚡ Sobrecargar Hashrate (Ver Anuncio Comercial)
+                        </button>
+                        
+                        <div style="display:flex; gap:10px; margin-bottom: 10px;">
+                            <button class="btn-boost" style="flex:1; background:linear-gradient(45deg, #f59e0b, #d97706); font-size:10px; animation:none;" onclick="openRoulette()">
+                                🎰 Ruleta Gratis
+                            </button>
+                            <button class="btn-boost" style="flex:1; background:linear-gradient(45deg, #8b5cf6, #6d28d9); font-size:10px; animation:none;" onclick="openReferrals()">
+                                👥 Red Afiliados
+                            </button>
+                        </div>
+                        <button class="btn-boost" id="btnMaintenance" style="width:100%; background:linear-gradient(45deg, #ef4444, #b91c1c); display:none; font-size:10px; animation:none; margin-bottom: 10px;" onclick="repairMiner()">
+                            🔧 Mantenimiento de Hardware ($2)
+                        </button>
+                        
+                        <div class="command-ui-modules">
+                            <div class="ui-stat-module">
+                                <span class="label">Tasa de Hash <span id="boostBadge" style="display:none; color:var(--success); font-weight:bold;">[BOOST x2]</span></span>
+                                <strong id="hashrateDisplay">15.0 TH/s</strong>
+                            </div>
+                            <div class="ui-stat-module">
+                                <span class="label">Rendimiento</span>
+                                <strong id="rateDisplay">0.0000000001 /s</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HISTORIAL -->
+            <div class="history-section">
+                <div class="history-header">
+                    <span>Registro del Sistema</span>
+                    <span id="totalRecordsLabel" style="font-size: 10px;">0 Registros</span>
+                </div>
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Detalle</th>
+                                <th>Monto</th>
+                                <th>Fecha y Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination-controls">
+                    <button class="page-btn" id="btnPrevPage" onclick="changePage(-1)">Anterior</button>
+                    <span id="pageIndicator">Página 1 de 1</span>
+                    <button class="page-btn" id="btnNextPage" onclick="changePage(1)">Siguiente</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DERECHO -->
+        <div class="right-column">
+            
+          <!-- CALCULADORA DE RENTABILIDAD DINÁMICA -->
+            <div class="card calc-card" style="margin-bottom: 15px;">
+                <div class="panel-header"><h2>Simulador por Equipo</h2></div>
+                <div class="panel-content" style="padding: 15px;">
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Evaluando Equipo:</span><br>
+                        <strong id="calcMinerName" style="color:var(--primary); font-size:14px;">Básico Sim Rig</strong>
+                    </div>
+                    
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span style="color:var(--text-muted)">Costo de Inversión:</span>
+                        <strong id="calcCost" style="color:white">$0.00</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span style="color:var(--text-muted)">Ganancia Diaria Aprox:</span>
+                        <strong id="calcEarnDaily" style="color:var(--warning)">$0.00</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span style="color:var(--text-muted)">Ganancia Mensual (30d):</span>
+                        <strong id="calcEarn30" style="color:var(--success)">$0.00</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:10px;">
+                        <span style="color:var(--text-muted)">Recuperación (ROI):</span>
+                        <strong id="calcRoi" style="color:var(--danger)">Infinito</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card tiers-card">
+                <div class="panel-header"><h2>Upgrades Comerciales</h2></div>
+                <div class="panel-content tiers-list" id="tiersContainer">
+                    <!-- Los planes se renderizan aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONEXIÓN JAVASCRIPT -->
+    <script src="js/app.js"></script>
+</body>
+</html>
