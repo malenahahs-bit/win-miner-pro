@@ -25,7 +25,7 @@
             --text-main: #f8fafc; --text-muted: #94a3b8; --danger: #ef4444; 
             --primary: #f7931a; --primary-dim: rgba(247, 147, 26, 0.15);
             --success: #10b981; --matrix-color: #00FF41; --glow-intensity: 15px;
-            --rig-frame: #2c313c; --video-filter: contrast(1) brightness(1);
+            --rig-frame: #2c313c; --terminal-green: #0f0;
         }
 
         body[data-tier="PRO"] { --primary: #3b82f6; --primary-dim: rgba(59, 130, 246, 0.25); --rig-frame: #3b82f6;}
@@ -42,17 +42,16 @@
             padding-top: env(safe-area-inset-top);
         }
         
-        #matrixCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.6; }
+        #matrixCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.5; }
         
         .card { background-color: var(--panel-bg-dark); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); overflow: hidden; margin-bottom: 20px; }
         .panel-header { padding: 16px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); }
         .panel-header h2 { font-size: 14px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
         .panel-content { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 15px; }
 
-        .mobile-bottom-nav { display: none; }
-
         .dashboard { position: relative; z-index: 1; max-width: 1400px; height: 100vh; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr 320px; gap: 20px; padding: 20px; overflow-y: auto; }
         .tab-pane { display: flex; flex-direction: column; gap: 20px; height: 100%; }
+        .mobile-bottom-nav { display: none; }
 
         @media (max-width: 1000px) {
             .dashboard { display: block; padding: 15px; padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
@@ -60,9 +59,8 @@
             .tab-pane.active { display: flex; }
             .mobile-bottom-nav { 
                 display: flex; position: fixed; bottom: 0; left: 0; width: 100%; 
-                background: #15181e; border-top: 1px solid rgba(255,255,255,0.05); z-index: 10000; 
-                padding-bottom: env(safe-area-inset-bottom);
-                height: calc(60px + env(safe-area-inset-bottom));
+                background: #15181e; border-top: 1px solid rgba(255,255,255,0.05); z-index: 9000; 
+                padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom));
                 box-shadow: 0 -4px 20px rgba(0,0,0,0.6); 
             }
             .nav-btn { flex: 1; background: transparent; border: none; color: #64748b; padding: 10px 0; font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; font-weight: bold; transition: 0.3s; }
@@ -72,7 +70,7 @@
 
         @keyframes fadeInTab { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Auth & KYC */
+        /* AUTH & KYC */
         .register-only { display: none; }
         .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3, 4, 6, 0.95); backdrop-filter: blur(15px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .auth-card { background: #1e2128; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.8); }
@@ -81,12 +79,11 @@
         .tc-checkbox-container { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 12px; color: var(--text-muted); text-align: left; }
         .auth-error { color: var(--danger); font-size: 13px; margin-bottom: 15px; display: none; font-weight: bold; }
 
-        /* Animación de Verificación Root */
         .verification-container { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; width: 100%; }
         .tech-spinner-wrapper { position: relative; width: 140px; height: 140px; margin: 0 auto 30px auto; }
         .tech-spinner-ring1 { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 4px solid transparent; border-top-color: var(--success); border-bottom-color: var(--success); border-radius: 50%; animation: spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); }
         .tech-spinner-ring2 { position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px; border: 2px dashed rgba(255, 255, 255, 0.4); border-radius: 50%; animation: spin 4s linear infinite reverse; }
-        .tech-spinner-core { position: absolute; top: 40px; left: 40px; right: 40px; bottom: 40px; background: var(--success); border-radius: 50%; box-shadow: 0 0 30px var(--success); animation: pulseCore 1.5s ease-in-out infinite; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #000; }
+        .tech-spinner-core { position: absolute; top: 40px; left: 40px; right: 40px; bottom: 40px; background: var(--success); border-radius: 50%; box-shadow: 0 0 30px var(--success); animation: pulseCore 1.5s ease-in-out infinite; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #000; font-weight:bold;}
         .verification-text { color: var(--success); font-size: 18px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; text-shadow: 0 0 15px rgba(16, 185, 129, 0.6); animation: blinkText 1.5s infinite; }
         .verification-subtext { color: var(--text-muted); font-size: 13px; line-height: 1.6; }
 
@@ -94,105 +91,114 @@
         @keyframes pulseCore { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.3); opacity: 1; } }
         @keyframes blinkText { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-        /* Elementos UI Base */
+        /* CARTERA UI */
         .crypto-selector { display: flex; gap: 10px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .crypto-btn { flex: 1; padding: 12px 10px; background: transparent; border: none; color: var(--text-muted); border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; }
         .crypto-btn.active { background: var(--primary); color: #000; box-shadow: 0 4px 10px var(--primary-dim); }
-        
         .balance-main { text-align: center; padding: 25px 0; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.03); position: relative;}
         .balance-main .label { color: var(--text-muted); font-size: 12px; }
         .balance-main .amount { font-size: 34px; font-weight: bold; color: var(--primary); text-shadow: 0 0 var(--glow-intensity) var(--primary-dim); margin: 5px 0; }
         .balance-main .usd { color: var(--success); font-size: 16px; font-weight: bold; }
-        
         .multi-mine-btn { margin-top: 15px; padding: 10px; width: 90%; background: linear-gradient(45deg, #10b981, #047857); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer; text-transform: uppercase;}
         .multi-mine-btn:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
-
         .progress-container { margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .progress-header { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 8px; font-weight: bold; }
         .progress-track { width: 100%; height: 10px; background: #000; border-radius: 5px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.05); }
         .progress-fill { height: 100%; background: linear-gradient(90deg, var(--danger), var(--primary)); width: 0%; transition: width 0.5s ease; box-shadow: 0 0 10px var(--primary); }
-
         .btn-action { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.2s; text-transform: uppercase; font-size: 13px; margin-top: 5px; }
         .btn-action.withdraw { background: #2a2d35; color: var(--text-main); border: 1px solid rgba(255,255,255,0.1); margin-top: 10px; } 
 
-        .btn-boost { background: linear-gradient(45deg, #8b5cf6, #3b82f6); color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 12px; animation: pulseBoost 2s infinite; }
-        @keyframes pulseBoost { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-
-        /* Panel Central */
+        /* CENTRO DE MANDO (Avanzado) */
         .rig-visual-panel { background-color: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.04); display: grid; gap: 15px; }
-        .cortex-module { background-color: #05070a; border-radius: 12px; border: 2px solid var(--rig-frame); position: relative; overflow: hidden; box-shadow: 0 0 30px var(--primary-dim), inset 0 0 40px rgba(0,0,0,0.9); height: 220px; transition: all 0.5s ease; display:flex; justify-content:center; align-items:center;}
-        
-        .rotating-mining-card { width: 100px; height: 100px; perspective: 1000px; z-index: 2; }
+        .cortex-module { background-color: #05070a; border-radius: 12px; border: 2px solid var(--rig-frame); position: relative; overflow: hidden; box-shadow: 0 0 30px var(--primary-dim), inset 0 0 40px rgba(0,0,0,0.9); height: 180px; display:flex; justify-content:center; align-items:center;}
+        .rotating-mining-card { width: 90px; height: 90px; perspective: 1000px; z-index: 2; }
         .card-inner { width: 100%; height: 100%; transition: transform 1s; transform-style: preserve-3d; animation: rotateCard 4s infinite linear; }
         @keyframes rotateCard { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; border-radius: 50%; border: 4px solid var(--primary); background: rgba(0,0,0,0.8); box-shadow: 0 0 25px var(--primary-dim); font-size: 50px; color: var(--primary); font-weight: bold; }
-        .card-back { transform: rotateY(180deg); font-size: 14px; text-align:center; border-color: var(--success); color: var(--success); }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; border-radius: 50%; border: 4px solid var(--primary); background: rgba(0,0,0,0.8); box-shadow: 0 0 25px var(--primary-dim); font-size: 40px; color: var(--primary); font-weight: bold; }
+        .card-back { transform: rotateY(180deg); font-size: 12px; text-align:center; border-color: var(--success); color: var(--success); }
+        
+        .terminal-box { background: #000; border: 1px solid #333; border-radius: 8px; padding: 10px; height: 100px; overflow: hidden; position: relative;}
+        .terminal-text { color: var(--terminal-green); font-family: 'Fira Code', monospace; font-size: 10px; line-height: 1.4; display: flex; flex-direction: column; justify-content: flex-end; height: 100%;}
+        .term-line { animation: slideUp 0.2s ease-out; margin-bottom: 2px;}
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .command-ui-modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .ui-stat-module { background-color: #1e2128; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .hardware-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-bar-container { background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);}
+        .stat-bar-title { font-size: 10px; color: var(--text-muted); margin-bottom: 5px; display: flex; justify-content: space-between;}
+        .s-bar-bg { width: 100%; height: 6px; background: #1e2128; border-radius: 3px; overflow: hidden; }
+        .s-bar-fill.temp { background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444); width: 65%; animation: pulseBar 2s infinite alternate;}
+        .s-bar-fill.power { background: linear-gradient(90deg, #3b82f6, #8b5cf6); width: 85%; animation: pulseBar 3s infinite alternate;}
+        @keyframes pulseBar { from { opacity: 0.8; } to { opacity: 1; } }
+
+        .command-ui-modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .ui-stat-module { background-color: #1e2128; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         .ui-stat-module span.label { display: block; color: var(--text-muted); font-size: 10px; font-weight: bold; margin-bottom: 5px;}
-        .ui-stat-module strong { font-size: 16px; color: var(--text-main); font-family: 'Fira Code', monospace; }
+        .ui-stat-module strong { font-size: 14px; color: var(--text-main); font-family: 'Fira Code', monospace; }
+        
+        .btn-boost { background: linear-gradient(45deg, #8b5cf6, #3b82f6); color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 11px; }
 
-        /* Tienda Mineros Mejorada */
+        /* TIENDA & TARJETAS */
+        .category-title { font-size: 16px; color: #fff; margin: 25px 0 15px 0; text-transform: uppercase; font-weight: 900; background: linear-gradient(90deg, var(--primary), transparent); padding: 8px 15px; border-radius: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
         .tier-card { background: #15181e; border: 1px solid #2a2d35; border-radius: 16px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: all 0.3s; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.3); overflow: hidden; }
         .tier-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--text-muted); opacity: 0.3; transition: 0.3s; }
         .tier-card.active { border-color: var(--primary); background: #1c1a17; box-shadow: 0 4px 15px var(--primary-dim); }
         .tier-card.active::before { background: var(--primary); opacity: 1; }
         .tier-card.locked { opacity: 0.7; }
-        .tier-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: #fff; }
-        .tier-details { background: #0d0f14; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.02); margin-bottom: 10px; }
-        .tier-details p { font-size: 11px; margin-bottom: 4px; display: flex; justify-content: space-between;}
-        .tier-cost-line { color: var(--success); font-weight: 900; font-size: 20px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .tier-cost-btn { background: #2a2d35; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 11px; font-weight: bold; transition: 0.3s; }
-        .tier-processing-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; color: var(--warning); font-weight: bold; }
-        
-        .category-title { font-size: 14px; color: var(--primary); margin: 20px 0 10px 0; text-transform: uppercase; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;}
-        .boost-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05);}
-        .boost-info h4 { font-size: 13px; color: #fff; margin-bottom: 4px;}
-        .boost-info p { font-size: 10px; color: var(--success);}
-        .boost-btn { background: var(--primary); color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;}
+        .tier-card h3 { font-size: 18px; font-weight: 900; margin-bottom: 12px; color: #fff; display: flex; justify-content: space-between; align-items: center;}
+        .tier-badge { font-size: 9px; padding: 3px 8px; border-radius: 10px; background: rgba(255,255,255,0.1); color: #fff;}
+        .tier-details { background: #0d0f14; padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.02); margin-bottom: 10px; }
+        .tier-details p { font-size: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 4px;}
+        .tier-details p:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+        .tier-cost-line { color: var(--success); font-weight: 900; font-size: 22px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .tier-cost-btn { background: #2a2d35; color: white; border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: bold; transition: 0.3s; }
+        .tier-processing-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; color: var(--warning); font-weight: bold; text-align: center; }
 
-        /* --- RULETA --- */
+        .boost-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05);}
+        .boost-info h4 { font-size: 14px; color: #fff; margin-bottom: 5px; font-weight: bold;}
+        .boost-info p { font-size: 11px; color: var(--text-muted); margin-bottom: 3px;}
+        .boost-info .b-highlight { color: var(--success); font-weight: bold;}
+        .boost-info .b-duration { color: var(--primary); font-size: 10px; font-weight: bold; background: rgba(247,147,26,0.1); padding: 2px 6px; border-radius: 4px;}
+        .boost-btn { background: var(--primary); color: #000; border: none; padding: 10px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer;}
+
+        /* RULETA CSS */
         .roulette-container { position: relative; width: 220px; height: 220px; margin: 0 auto 20px auto; }
         .roulette-wheel { width: 100%; height: 100%; border-radius: 50%; border: 6px solid #2a2d35; background: conic-gradient( #10b981 0deg 60deg, #ef4444 60deg 120deg, #f59e0b 120deg 180deg, #3b82f6 180deg 240deg, #f7931a 240deg 300deg, #8b5cf6 300deg 360deg ); position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.8); overflow: hidden; }
         .roulette-wheel::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(0deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%), linear-gradient(60deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%), linear-gradient(120deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%); border-radius: 50%; pointer-events: none; }
         .roulette-marker { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid white; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); z-index: 10; }
         .roulette-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #1e2128; border-radius: 50%; border: 3px solid var(--primary); z-index: 5; display: flex; align-items: center; justify-content: center; font-size: 16px;}
-        .r-label { position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 1px 1px 2px black; z-index: 4; }
-        .l-win { top: 20px; left: 120px; transform: rotate(30deg); } .l-lose1 { top: 90px; right: 5px; transform: rotate(90deg); } .l-big1 { bottom: 20px; right: 40px; transform: rotate(150deg); } .l-mid { bottom: 20px; left: 40px; transform: rotate(210deg); } .l-big2 { top: 90px; left: 5px; transform: rotate(270deg); } .l-lose2 { top: 20px; left: 30px; transform: rotate(330deg); }
+        .r-label { position: absolute; font-size: 11px; font-weight: 900; color: white; text-shadow: 1px 1px 3px black; z-index: 4; }
+        .l-win { top: 25px; left: 130px; transform: rotate(30deg); } .l-lose1 { top: 100px; right: 8px; transform: rotate(90deg); } .l-big1 { bottom: 25px; right: 40px; transform: rotate(150deg); } .l-mid { bottom: 25px; left: 40px; transform: rotate(210deg); } .l-big2 { top: 100px; left: 8px; transform: rotate(270deg); } .l-lose2 { top: 25px; left: 35px; transform: rotate(330deg); }
 
-        /* --- SISTEMA DE REFERIDOS --- */
+        /* REFERIDOS */
         .ref-card { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
         .ref-link-box { display: flex; gap: 10px; margin-top: 10px; }
         .ref-input { flex: 1; background: #0d0f14; border: 1px solid #2a2d35; color: var(--success); padding: 12px; border-radius: 8px; font-size: 12px; outline: none; }
-        .ref-btn { background: var(--primary); color: black; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; }
+        .ref-btn { background: var(--primary); color: black; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .ref-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;}
         .ref-level-box { background: #1e2128; border: 1px solid #2a2d35; border-radius: 8px; padding: 12px; text-align: center;}
         .ref-level-box span { display: block; font-size: 10px; color: var(--text-muted); font-weight: bold; margin-bottom: 5px; }
         .ref-level-box strong { font-size: 18px; color: #fff; }
-        .ref-level-box .ref-earn { color: var(--success); font-size: 12px; margin-top: 5px; }
+        .ref-level-box .ref-earn { color: var(--success); font-size: 12px; margin-top: 5px; font-weight: bold; }
 
-        /* Modales */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 999; }
+        /* MODALES */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 999; }
         .payment-modal { background: #1e2128; border-radius: 20px; padding: 25px; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-        .payment-modal h3 { font-size: 18px; margin-bottom: 15px; color: var(--primary); text-align: center; }
+        .payment-modal h3 { font-size: 18px; margin-bottom: 15px; color: var(--primary); text-align: center; font-weight: 900; text-transform: uppercase;}
         .cost-display { font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #fff; text-align: center; }
-        .btn-cancel { background: #2a2d35; color: var(--text-main); border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-cancel { background: #2a2d35; color: var(--text-main); border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
         .payment-select, .wallet-input { width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none; font-size: 13px; }
-        .wallet-input { color: var(--success); cursor: text;}
+        .wallet-input { color: var(--success); cursor: text; font-family: monospace;}
         .modal-btns { display: flex; gap: 12px; margin-top: 25px; }
         .btn-confirm { flex: 2; background: #166534; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer;}
         
         #paymentStatusArea { display: none; text-align: center; padding: 30px 0;}
         .payment-spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
 
-        /* T&C Modal */
         .tc-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 10001; }
         .tc-modal { background: #1e2128; border-radius: 16px; padding: 25px; width: 90%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column; }
-        .tc-modal h3 { color: var(--danger); margin-bottom: 15px; font-size: 16px; text-transform: uppercase; text-align: center; }
         .tc-content { flex: 1; overflow-y: auto; color: #cbd5e1; font-size: 12px; line-height: 1.5; text-align: left; padding: 10px 0; margin-bottom: 15px; }
 
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 10000; width: 90%; max-width: 400px; }
@@ -201,15 +207,15 @@
 </head>
 <body>
 
-    <!-- OVERLAY DE REGISTRO E INICIO DE SESIÓN -->
+    <!-- AUTH OVERLAY -->
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-card" id="loginCard">
-            <h2 id="authTitle" style="color:var(--primary); font-size:24px;">WIN-MINER-PRO</h2>
-            <p style="color:var(--text-muted); margin-bottom:20px; font-size:12px;">Acceso al Panel de Comando Industrial</p>
+            <h2 id="authTitle" style="color:var(--primary); font-size:24px; font-weight:900;">WIN-MINER-PRO</h2>
+            <p style="color:var(--text-muted); margin-bottom:20px; font-size:12px;">Terminal de Minería en la Nube</p>
             
             <div class="auth-error" id="authErrorMsg">Error de credenciales.</div>
             
-            <!-- SISTEMA DE VERIFICACIÓN ROOT -->
+            <!-- SPINNER ROOT -->
             <div class="verification-container" id="verificationBlock">
                 <div class="tech-spinner-wrapper">
                     <div class="tech-spinner-ring1" id="tsRing1"></div>
@@ -217,49 +223,49 @@
                     <div class="tech-spinner-core" id="tsCore">₿</div>
                 </div>
                 <div class="verification-text" id="verifStatusTitle">ENCRIPTANDO DATOS...</div>
-                <div class="verification-subtext" id="verifStatusDesc">Procesando llaves de seguridad.</div>
+                <div class="verification-subtext" id="verifStatusDesc">Estableciendo túnel seguro.</div>
             </div>
 
             <input type="text" id="authName" class="auth-input register-only" placeholder="Nombres del Inversor">
             <input type="text" id="authLastName" class="auth-input register-only" placeholder="Apellidos del Inversor">
-            <input type="text" id="authDni" class="auth-input register-only" placeholder="Cédula de Identidad o DNI">
+            <input type="text" id="authDni" class="auth-input register-only" placeholder="Cédula / DNI">
             <input type="tel" id="authPhone" class="auth-input register-only" placeholder="Teléfono Móvil">
             <input type="email" id="authEmail" class="auth-input" placeholder="Correo Electrónico">
             <input type="password" id="authPassword" class="auth-input" placeholder="Contraseña Segura">
             
-            <!-- TÉRMINOS Y CONDICIONES (KYC) -->
             <div class="tc-checkbox-container register-only" id="tcContainer">
                 <input type="checkbox" id="tcCheckbox" style="transform: scale(1.5);">
-                <label for="tcCheckbox">He leído y acepto los <span style="color:var(--primary); text-decoration:underline;" onclick="document.getElementById('tcModalOverlay').style.display='flex'">Términos y Condiciones</span>.</label>
+                <label for="tcCheckbox">Acepto los <span style="color:var(--primary); text-decoration:underline;" onclick="document.getElementById('tcModalOverlay').style.display='flex'">Términos (KYC)</span>.</label>
             </div>
 
             <button class="auth-btn" id="authActionButton" onclick="loginUser()">Iniciar Sesión</button>
             <div style="margin-top:20px;" id="authSwitchContainer">
                 <span style="font-size: 12px; color: var(--text-muted);" id="authSwitchPrompt">¿Aún no tienes cuenta?</span>
-                <button style="background:none; border:none; color:var(--primary); font-weight:bold; padding-left:10px; cursor:pointer;" onclick="toggleAuthMode()" id="authSwitchBtn">Crear Cuenta</button>
+                <button style="background:none; border:none; color:var(--primary); font-weight:bold; padding-left:10px; cursor:pointer;" onclick="toggleAuthMode()" id="authSwitchBtn">Regístrate</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE TÉRMINOS Y CONDICIONES -->
+    <!-- MODAL KYC -->
     <div class="tc-modal-overlay" id="tcModalOverlay">
         <div class="tc-modal">
-            <h3>Términos y Condiciones (KYC)</h3>
+            <h3 style="color:var(--danger)">Términos y Condiciones (KYC)</h3>
             <div class="tc-content">
-                <strong>1. ACEPTACIÓN DE LOS TÉRMINOS</strong><br>
-                El uso de la plataforma WIN-MINER-PRO implica la aceptación total. Usted comprende y acepta que toda inversión conlleva riesgos.<br><br>
-                <strong>2. VERIFICACIÓN ROOT</strong><br>
-                Toda cuenta nueva pasa por un proceso de aprobación manual del Administrador.<br><br>
-                <strong>3. KYC (KNOW YOUR CUSTOMER)</strong><br>
-                La administración exige verificación de identidad. Datos falsos resultarán en pérdida irreversible.<br><br>
-                <strong>4. SEGURIDAD</strong><br>
-                Es su responsabilidad custodiar sus claves y billeteras.
+                <strong>1. ACEPTACIÓN</strong><br>El uso de WIN-MINER-PRO implica aceptación de los riesgos de la red criptográfica.<br><br>
+                <strong>2. VERIFICACIÓN ROOT</strong><br>Toda cuenta nueva y compra de mineros de alto nivel pasa por un proceso de aprobación manual del Administrador.<br><br>
+                <strong>3. KYC ESTRICTO</strong><br>Exigimos verificación de identidad real para retiros. Datos falsos = Bloqueo.<br><br>
+                <strong>4. RESPONSABILIDAD</strong><br>Debe custodiar sus billeteras correctamente.
             </div>
             <button class="btn-action" style="background:#166534; color:white;" onclick="document.getElementById('tcModalOverlay').style.display='none'">ENTENDIDO</button>
         </div>
     </div>
 
+    <!-- ANIMACIÓN DE FONDO -->
     <canvas id="matrixCanvas"></canvas>
+    
+    <!-- FOMO Y LLUVIA DE DINERO -->
+    <div id="fomo-container" style="position: fixed; top: 80px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9998;"></div>
+    <div id="moneyRainContainer" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 10000; display: none; overflow: hidden;"></div>
 
     <div class="dashboard">
         
@@ -299,7 +305,7 @@
             </div>
         </div>
 
-        <!-- PESTAÑA 2: MINERO -->
+        <!-- PESTAÑA 2: MINERO AVANZADO -->
         <div class="tab-pane active" id="tab-miner">
             <div class="card hardware-card">
                 <div class="panel-header">
@@ -317,11 +323,30 @@
                             </div>
                         </div>
 
+                        <!-- Terminal Simulada -->
+                        <div class="terminal-box" id="minerTerminal">
+                            <div class="terminal-text" id="terminalLog">
+                                <div class="term-line">Iniciando nodo conexión...</div>
+                            </div>
+                        </div>
+
+                        <!-- Barras de Salud -->
+                        <div class="hardware-stats">
+                            <div class="stat-bar-container">
+                                <div class="stat-bar-title"><span>Temp (Núcleo)</span> <span id="tempVal">65°C</span></div>
+                                <div class="s-bar-bg"><div class="s-bar-fill temp"></div></div>
+                            </div>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar-title"><span>Energía</span> <span id="powerVal">85%</span></div>
+                                <div class="s-bar-bg"><div class="s-bar-fill power"></div></div>
+                            </div>
+                        </div>
+
                         <div style="display:flex; gap:10px;">
-                            <button class="btn-boost" style="flex:1; background:linear-gradient(45deg, #f59e0b, #d97706); animation:none;" onclick="document.getElementById('rouletteModal').style.display='flex'">
+                            <button class="btn-boost" style="flex:1; background:linear-gradient(45deg, #f59e0b, #d97706);" onclick="document.getElementById('rouletteModal').style.display='flex'">
                                 🎰 Ruleta
                             </button>
-                            <button class="btn-boost" style="flex:1; background:linear-gradient(45deg, #8b5cf6, #6d28d9); animation:none;" onclick="openReferrals()">
+                            <button class="btn-boost" style="flex:1; background:linear-gradient(45deg, #8b5cf6, #6d28d9);" onclick="openReferrals()">
                                 👥 Referidos
                             </button>
                         </div>
@@ -344,18 +369,43 @@
         <!-- PESTAÑA 3: TIENDA -->
         <div class="tab-pane" id="tab-store">
             <div class="card tiers-card">
-                <div class="panel-header"><h2>Upgrades de Hardware</h2></div>
+                <div class="panel-header"><h2>Mercado de Hardware</h2></div>
                 <div class="panel-content" style="padding-right: 5px; overflow-y:auto;">
                     
-                    <div class="category-title">🚀 Módulos de Aceleración (Boosts)</div>
+                    <div class="category-title" style="margin-top:0;">🚀 Módulos de Aceleración (Boosts)</div>
                     <div id="boostsContainer"></div>
 
-                    <div class="category-title" style="margin-top:30px;">⚙️ Nuevos Mineros (Mercado)</div>
                     <div id="tiersContainer"></div>
                 </div>
             </div>
         </div>
 
+        <!-- PESTAÑA 4: HISTORIAL -->
+        <div class="tab-pane" id="tab-history">
+            <div class="card history-section" style="height: 100%;">
+                <div class="panel-header" style="display: flex; justify-content: space-between;">
+                    <h2>Registro Transaccional</h2>
+                    <span id="totalRecordsLabel" style="font-size: 11px; color: var(--text-muted);">0 Registros</span>
+                </div>
+                <div style="flex: 1; overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">Estado</th>
+                                <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">Detalle</th>
+                                <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                </div>
+                <div style="padding: 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">
+                    <button style="background: #2a2d35; border: none; color: white; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor:pointer;" id="btnPrevPage" onclick="changePage(-1)">Anterior</button>
+                    <span id="pageIndicator" class="mono" style="font-size: 12px;">1 / 1</span>
+                    <button style="background: #2a2d35; border: none; color: white; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor:pointer;" id="btnNextPage" onclick="changePage(1)">Siguiente</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- NAVEGACIÓN INFERIOR (MÓVILES) -->
@@ -372,9 +422,14 @@
             <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
             Tienda
         </button>
+        <button class="nav-btn" id="nav-tab-history" onclick="switchTab('tab-history')">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Historial
+        </button>
     </nav>
 
-    <!-- MODAL DE RULETA -->
+    <!-- MODALES VARIOS -->
+    <!-- RULETA -->
     <div class="modal-overlay" id="rouletteModal">
         <div class="payment-modal" style="text-align: center;">
             <h3 style="color:var(--primary); margin-bottom: 20px;">Ruleta Cuántica</h3>
@@ -395,12 +450,12 @@
         </div>
     </div>
 
-    <!-- MODAL DE REFERIDOS (3 NIVELES) -->
+    <!-- REFERIDOS -->
     <div class="modal-overlay" id="referralModal">
         <div class="payment-modal">
             <h3>Programa de Afiliados (3 Niveles)</h3>
             <div class="ref-card">
-                <p style="font-size:11px; color:var(--text-muted);">Gana comisiones por las compras de tus invitados y los invitados de ellos.</p>
+                <p style="font-size:11px; color:var(--text-muted);">Gana comisiones por las compras de tus invitados y su red.</p>
                 <div class="ref-link-box">
                     <input type="text" class="ref-input" id="refLinkInput" readonly>
                     <button class="ref-btn" onclick="copyRefLink()">Copiar</button>
@@ -424,13 +479,12 @@
         </div>
     </div>
 
-    <!-- MODAL DE OPCIONES DE PAGO DUAL -->
+    <!-- PAGO DUAL (ELEGIR SALDO O DEPÓSITO) -->
     <div class="modal-overlay" id="purchaseOptionsOverlay">
         <div class="payment-modal">
             <h3 id="purchaseModalName">Objeto</h3>
             <div class="cost-display mono" style="margin-bottom:10px;">Costo: <span id="purchaseModalCost">$0 USD</span></div>
             <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px; text-align:center;">Seleccione su método de pago</p>
-            
             <button class="btn-action" style="background:var(--primary); color:#000; margin-bottom:10px;" onclick="payWithBalance()">
                 Pagar con Saldo Minado
             </button>
@@ -441,7 +495,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE DEPÓSITO EXTERNO -->
+    <!-- PAGO DEPÓSITO EXTERNO -->
     <div class="modal-overlay" id="paymentOverlay">
         <div class="payment-modal">
             <div id="paymentInputArea">
@@ -493,7 +547,6 @@
         try {
             firebase.initializeApp(firebaseConfig);
             isFirebaseActive = true;
-            console.log("Firebase Conectado.");
         } catch(e) {
             console.warn("Firebase no configurado. Operando Local.");
         }
@@ -523,19 +576,10 @@
         }
 
         // ==========================================
-        // DATOS (40 Mineros + 10 Boosts)
+        // DATOS (40 Mineros + 10 Boosts Detallados)
         // ==========================================
-        const cryptoData = { 
-            'BTC': { price: 69150, symbol: 'BTC', icon: '₿' }, 
-            'LTC': { price: 85.50, symbol: 'LTC', icon: 'Ł' }, 
-            'DASH': { price: 32.10, symbol: 'DASH', icon: 'Ð' } 
-        };
-
-        const paymentWallets = { 
-            'USDT': 'TNCFjTLYp63k2ocAooAnTUJbodaWLrRQhh', 
-            'BTC': '1GXrmr4teSrfGTp294YjG11Zk6q7zDLrtv', 
-            'ETH': '0x02a8f8567e2a3ed68b51de71d25f23a27bb7cb7f' 
-        };
+        const cryptoData = { 'BTC': { price: 69150, symbol: 'BTC', icon: '₿' }, 'LTC': { price: 85.50, symbol: 'LTC', icon: 'Ł' }, 'DASH': { price: 32.10, symbol: 'DASH', icon: 'Ð' } };
+        const paymentWallets = { 'USDT': 'TNCFjTLYp63k2ocAooAnTUJbodaWLrRQhh', 'BTC': '1GXrmr4teSrfGTp294YjG11Zk6q7zDLrtv', 'ETH': '0x02a8f8567e2a3ed68b51de71d25f23a27bb7cb7f' };
 
         const tiers = [];
         let tId = 1;
@@ -549,27 +593,27 @@
         for(let i=1; i<=10; i++) { tiers.push({ id: tId++, category: "ELITE", name: `Elite Hash V${i}`, hashrate: (2000+(i*500)), baseBtcPerSec: 0.000000000800 * i, costUSD: 2000 + (i*500), minWd: 100 }); }
 
         const paidBoosts = [
-            { id: 'b1', name: 'Ventiladores Industriales', desc: '+2 TH/s Permanente', cost: 5, boost: 2 },
-            { id: 'b2', name: 'Pasta Térmica de Oro', desc: '+5 TH/s Permanente', cost: 10, boost: 5 },
-            { id: 'b3', name: 'Fuente Platino 2000W', desc: '+12 TH/s Permanente', cost: 20, boost: 12 },
-            { id: 'b4', name: 'Cableado Óptico', desc: '+25 TH/s Permanente', cost: 35, boost: 25 },
-            { id: 'b5', name: 'Refrigeración Líquida', desc: '+40 TH/s Permanente', cost: 50, boost: 40 },
-            { id: 'b6', name: 'Overclock Inteligente AI', desc: '+70 TH/s Permanente', cost: 80, boost: 70 },
-            { id: 'b7', name: 'Enfriamiento por Nitrógeno', desc: '+120 TH/s Permanente', cost: 120, boost: 120 },
-            { id: 'b8', name: 'Chips de Silicio Cuántico', desc: '+200 TH/s Permanente', cost: 180, boost: 200 },
-            { id: 'b9', name: 'Conexión Satelital', desc: '+350 TH/s Permanente', cost: 250, boost: 350 },
-            { id: 'b10', name: 'Fusión de Núcleo Total', desc: '+600 TH/s Permanente', cost: 400, boost: 600 }
+            { id: 'b1', name: 'Ventiladores Industriales', desc: 'Enfriamiento básico.', boost: 2, cost: 5, durText: 'Permanente' },
+            { id: 'b2', name: 'Pasta Térmica de Oro', desc: 'Mejora conductividad.', boost: 5, cost: 10, durText: 'Permanente' },
+            { id: 'b3', name: 'Fuente Platino 2000W', desc: 'Energía ininterrumpida.', boost: 12, cost: 20, durText: 'Permanente' },
+            { id: 'b4', name: 'Cableado Óptico', desc: 'Reduce latencia de red.', boost: 25, cost: 35, durText: 'Permanente' },
+            { id: 'b5', name: 'Refrigeración Líquida', desc: 'Overclock estable.', boost: 40, cost: 50, durText: 'Permanente' },
+            { id: 'b6', name: 'Overclock AI', desc: 'Inteligencia Artificial.', boost: 70, cost: 80, durText: 'Permanente' },
+            { id: 'b7', name: 'Nitrógeno Líquido', desc: 'Cero calentamiento.', boost: 120, cost: 120, durText: 'Permanente' },
+            { id: 'b8', name: 'Chip Silicio Cuántico', desc: 'Procesamiento masivo.', boost: 200, cost: 180, durText: 'Permanente' },
+            { id: 'b9', name: 'Conexión Satelital', desc: 'Ping 0ms a la red.', boost: 350, cost: 250, durText: 'Permanente' },
+            { id: 'b10', name: 'Fusión de Núcleo', desc: 'Poder máximo absoluto.', boost: 600, cost: 400, durText: 'Permanente' }
         ];
 
         // ==========================================
-        // ESTADO Y AUTH CON FIREBASE (ROOT VERIFICATION)
+        // AUTH CON FIREBASE (ROOT VERIFICATION)
         // ==========================================
         let user = null;
         let isLoginMode = true;
 
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
-            document.getElementById('authTitle').innerText = isLoginMode ? "WIN-MINER-PRO" : "Registro de Inversor";
+            document.getElementById('authTitle').innerText = isLoginMode ? "WIN-MINER-PRO" : "Registro Inversor";
             document.getElementById('authActionButton').innerText = isLoginMode ? "Iniciar Sesión" : "Crear Cuenta";
             document.getElementById('authSwitchPrompt').innerText = isLoginMode ? "¿Aún no tienes cuenta?" : "¿Ya posees cuenta?";
             document.getElementById('authSwitchBtn').innerText = isLoginMode ? "Regístrate" : "Iniciar Sesión";
@@ -582,18 +626,15 @@
             const pass = document.getElementById('authPassword').value;
             const tcCheckbox = document.getElementById('tcCheckbox');
             const errorMsg = document.getElementById('authErrorMsg');
-            
             errorMsg.style.display = "none";
 
             if(!isLoginMode && tcCheckbox && !tcCheckbox.checked) {
                 errorMsg.innerText = "Debe aceptar los Términos (KYC).";
-                errorMsg.style.display = "block";
-                return;
+                errorMsg.style.display = "block"; return;
             }
             if(email.length < 5 || pass.length < 6) {
                 errorMsg.innerText = "Complete todos los campos.";
-                errorMsg.style.display = "block";
-                return;
+                errorMsg.style.display = "block"; return;
             }
 
             document.querySelectorAll('.auth-input').forEach(el => el.style.display = 'none');
@@ -605,23 +646,22 @@
             if(isFirebaseActive) {
                 if(isLoginMode) {
                     firebase.auth().signInWithEmailAndPassword(email, pass)
-                        .then((userCredential) => { loadUserData(userCredential.user.uid, email); })
+                        .then((userCred) => { loadUserData(userCred.user.uid, email); })
                         .catch((error) => { restoreAuthUI(error.message); });
                 } else {
                     firebase.auth().createUserWithEmailAndPassword(email, pass)
-                        .then((userCredential) => { 
+                        .then((userCred) => { 
                             const newId = `ID-${Math.floor(Math.random() * 900000) + 100000}`;
-                            loadUserData(userCredential.user.uid, email, newId); 
+                            loadUserData(userCred.user.uid, email, newId); 
                         })
                         .catch((error) => { restoreAuthUI(error.message); });
                 }
             } else {
-                // Modo Fallback Local
                 user = {
                     uid: "local", idUsuario: "ID-LOCAL", status: "approved",
                     balances: { BTC: 0, LTC: 0, DASH: 0 }, activeCoin: 'BTC', tierId: 1,
                     unlockedTiers: [1], pendingTiers: [], bonusHashrate: 0, multiMiningUnlocked: false,
-                    lastSpinDate: 0, referrals: { lvl1: 0, lvl2: 0, lvl3: 0 }
+                    lastSpinDate: 0, referrals: { lvl1: 0, lvl2: 0, lvl3: 0 }, systemHistory: []
                 };
                 document.getElementById('authOverlay').style.display = "none";
                 initApp();
@@ -639,31 +679,29 @@
             document.getElementById('verificationBlock').style.display = 'none';
             
             const errorMsg = document.getElementById('authErrorMsg');
-            errorMsg.innerText = msg; 
-            errorMsg.style.display = "block"; 
+            errorMsg.innerText = msg; errorMsg.style.display = "block"; 
         }
 
         function loadUserData(uid, email, newId = null) {
             firebase.database().ref('users/' + uid).once('value').then((snapshot) => {
                 if(snapshot.exists()) {
-                    user = snapshot.val();
-                    user.uid = uid;
+                    user = snapshot.val(); user.uid = uid;
                     if(!user.unlockedTiers) user.unlockedTiers = [1];
                     if(!user.pendingTiers) user.pendingTiers = [];
                     if(!user.balances) user.balances = { BTC: 0, LTC: 0, DASH: 0 };
                     if(!user.referrals) user.referrals = { lvl1: 0, lvl2: 0, lvl3: 0 };
+                    if(!user.systemHistory) user.systemHistory = [];
                 } else {
                     user = {
                         uid: uid, email: email, idUsuario: newId, status: 'pending', 
                         balances: { BTC: 0, LTC: 0, DASH: 0 }, activeCoin: 'BTC',
-                        tierId: 1, unlockedTiers: [1], pendingTiers: [],
+                        tierId: 1, unlockedTiers: [1], pendingTiers: [], systemHistory: [],
                         bonusHashrate: 0, multiMiningUnlocked: false, lastSpinDate: 0,
                         referrals: { lvl1: 0, lvl2: 0, lvl3: 0 }
                     };
                     firebase.database().ref('users/' + uid).set(user);
                 }
                 
-                // SISTEMA DE APROBACIÓN ROOT (Registro de Nuevos)
                 if(user.status === 'pending') {
                     const vTitle = document.getElementById('verifStatusTitle');
                     const vDesc = document.getElementById('verifStatusDesc');
@@ -671,30 +709,22 @@
                     vDesc.innerHTML = "Su registro está en revisión por el Administrador.";
                     
                     firebase.database().ref('users/' + uid + '/status').on('value', (statusSnap) => {
-                        const currentStatus = statusSnap.val();
-                        if(currentStatus === 'approved') {
+                        if(statusSnap.val() === 'approved') {
                             user.status = 'approved';
                             vTitle.innerText = "ACCESO CONCEDIDO";
                             firebase.database().ref('users/' + uid + '/status').off();
-                            setTimeout(() => {
-                                document.getElementById('authOverlay').style.display = "none";
-                                initApp();
-                            }, 1500);
-                        } else if(currentStatus === 'rejected') {
-                            vTitle.innerText = "ACCESO DENEGADO";
-                            vTitle.style.color = "var(--danger)";
-                            vDesc.innerHTML = "Cuenta rechazada por KYC.";
-                            stopSpinners();
+                            setTimeout(() => { document.getElementById('authOverlay').style.display = "none"; initApp(); }, 1500);
+                        } else if(statusSnap.val() === 'rejected') {
+                            vTitle.innerText = "ACCESO DENEGADO"; vTitle.style.color = "var(--danger)";
+                            vDesc.innerHTML = "Cuenta rechazada por KYC."; stopSpinners();
                         }
                     });
                 } else if(user.status === 'rejected') {
                     document.getElementById('verifStatusTitle').innerText = "ACCESO DENEGADO";
                     document.getElementById('verifStatusTitle').style.color = "var(--danger)";
-                    document.getElementById('verifStatusDesc').innerText = "Cuenta bloqueada.";
-                    stopSpinners();
+                    document.getElementById('verifStatusDesc').innerText = "Cuenta bloqueada."; stopSpinners();
                 } else {
-                    document.getElementById('authOverlay').style.display = "none";
-                    initApp();
+                    document.getElementById('authOverlay').style.display = "none"; initApp();
                 }
             }).catch(e => restoreAuthUI(e.message));
         }
@@ -707,36 +737,29 @@
         }
 
         function saveProgress() { 
-            if(isFirebaseActive && user && user.uid !== "local") {
-                firebase.database().ref('users/' + user.uid).set(user);
-            }
+            if(isFirebaseActive && user && user.uid !== "local") firebase.database().ref('users/' + user.uid).set(user);
         }
 
         function logoutUser() {
-            if(isFirebaseActive) {
-                firebase.auth().signOut().then(() => { window.location.reload(); });
-            } else {
-                window.location.reload();
-            }
+            if(isFirebaseActive) firebase.auth().signOut().then(() => { window.location.reload(); });
+            else window.location.reload();
         }
 
         // ==========================================
-        // RENDERIZADO Y LÓGICA DE LA APP
+        // RENDERIZADO Y TIENDA (Especificaciones Completas)
         // ==========================================
         function initApp() {
             renderTiers();
             renderBoosts();
+            renderHistory();
             changeCoin('BTC');
             updateMultiMineUI();
             startMiningLoop();
 
-            // Escuchar cambios en pendingTiers si el admin lo aprueba
             if(isFirebaseActive && user.uid !== "local") {
                 firebase.database().ref('users/' + user.uid + '/unlockedTiers').on('value', snap => {
                     const dbUnlocked = snap.val() || [1];
                     user.unlockedTiers = dbUnlocked;
-                    
-                    // Si un pending fue aprobado
                     if(user.pendingTiers && user.pendingTiers.length > 0) {
                         user.pendingTiers = user.pendingTiers.filter(pendingId => {
                             if(user.unlockedTiers.includes(pendingId)) {
@@ -745,9 +768,9 @@
                                 const tier = tiers.find(t => t.id === pendingId);
                                 document.body.setAttribute('data-tier', tier.category);
                                 document.getElementById('activePlanDisplay').innerText = `Rig: ${tier.name}`;
-                                return false; // Remover de pending
+                                return false; 
                             }
-                            return true; // Mantener en pending
+                            return true; 
                         });
                         saveProgress();
                     }
@@ -763,8 +786,8 @@
                 container.innerHTML += `
                     <div class="boost-item">
                         <div class="boost-info">
-                            <h4>${b.name}</h4>
-                            <p>${b.desc}</p>
+                            <h4>${b.name} <span class="b-duration">${b.durText}</span></h4>
+                            <p>${b.desc} <span class="b-highlight">+${b.boost} TH/s</span></p>
                         </div>
                         <button class="boost-btn" onclick="openPurchaseOptions('boost', '${b.id}', '${b.name}', ${b.cost})">$${b.cost} USD</button>
                     </div>
@@ -779,7 +802,7 @@
             
             tiers.forEach(tier => {
                 if(tier.category !== lastCat) {
-                    container.innerHTML += `<div class="category-title" style="margin-top:20px;">Categoría: ${tier.category}</div>`;
+                    container.innerHTML += `<div class="category-title" style="margin-top:25px;">Categoría: ${tier.category}</div>`;
                     lastCat = tier.category;
                 }
                 
@@ -788,11 +811,8 @@
                 const isPending = user.pendingTiers.includes(tier.id);
 
                 let statusOverlay = '';
-                if(isPending) {
-                    statusOverlay = `<div class="tier-processing-overlay"><div class="payment-spinner"></div><p>ESPERANDO APROBACIÓN ROOT</p></div>`;
-                }
+                if(isPending) statusOverlay = `<div class="tier-processing-overlay"><div class="payment-spinner"></div><br><p>ESPERANDO APROBACIÓN ROOT</p></div>`;
 
-                // Cálculo de ROI preciso
                 const dailyUSD = tier.baseBtcPerSec * 86400 * cryptoData['BTC'].price;
                 const roiDays = tier.costUSD > 0 ? Math.ceil(tier.costUSD / dailyUSD) : 'Infinito';
 
@@ -800,11 +820,11 @@
                     <div class="tier-card ${isCurrent ? 'active' : ''} ${(!isUnlocked && !isCurrent && !isPending) ? 'locked' : ''}" 
                          onclick="${(!isCurrent && !isPending) ? (isUnlocked ? `activateTier(${tier.id})` : `openPurchaseOptions('tier', ${tier.id}, '${tier.name}', ${tier.costUSD})`) : ''}">
                         ${statusOverlay}
-                        <h3>${tier.name}</h3>
+                        <h3>${tier.name} <span class="tier-badge">${tier.category}</span></h3>
                         <div class="tier-details">
                             <p><span>Tasa de Hash:</span> <strong style="color:var(--primary);">${tier.hashrate} TH/s</strong></p>
                             <p><span>Retiro Mínimo:</span> <strong>$${tier.minWd} USD</strong></p>
-                            <p><span>Recuperación (ROI):</span> <strong style="color:var(--success);">${roiDays} Días</strong></p>
+                            <p><span>Retorno Inversión (ROI):</span> <strong style="color:var(--success);">${roiDays} Días</strong></p>
                         </div>
                         <div class="tier-cost-line">
                             $${tier.costUSD}
@@ -820,18 +840,13 @@
             const tier = tiers.find(t => t.id === id);
             document.body.setAttribute('data-tier', tier.category);
             document.getElementById('activePlanDisplay').innerText = `Rig: ${tier.name}`;
-            saveProgress();
-            renderTiers();
-            showToast(`✅ Rig Cambiado: ${tier.name}`);
+            saveProgress(); renderTiers(); showToast(`✅ Rig Cambiado: ${tier.name}`);
         }
 
         // ==========================================
-        // LÓGICAS DE COMPRA DUAL Y VERIFICACIÓN ROOT
+        // PAGO DUAL Y VERIFICACIÓN ROOT
         // ==========================================
-        let currentPurchaseType = null;
-        let currentPurchaseId = null;
-        let currentPurchaseCost = 0;
-        let currentPurchaseName = '';
+        let currentPurchaseType = null; let currentPurchaseId = null; let currentPurchaseCost = 0; let currentPurchaseName = '';
 
         function updateWalletAddressModal() { 
             const select = document.getElementById('cryptoNetworkSelect');
@@ -849,16 +864,8 @@
         }
 
         function openPurchaseOptions(type, id, name, cost) {
-            if(cost === 0 && type === 'tier') {
-                executePurchase(type, id); // Plan gratuito directo
-                return;
-            }
-
-            currentPurchaseType = type;
-            currentPurchaseId = id;
-            currentPurchaseCost = cost;
-            currentPurchaseName = name;
-            
+            if(cost === 0 && type === 'tier') { executePurchase(type, id); return; }
+            currentPurchaseType = type; currentPurchaseId = id; currentPurchaseCost = cost; currentPurchaseName = name;
             document.getElementById('purchaseModalName').innerText = name;
             document.getElementById('purchaseModalCost').innerText = `$${cost} USD`;
             document.getElementById('purchaseOptionsOverlay').style.display = 'flex';
@@ -868,17 +875,13 @@
             if(deductBalanceUSD(currentPurchaseCost)) {
                 executePurchase(currentPurchaseType, currentPurchaseId);
                 document.getElementById('purchaseOptionsOverlay').style.display = 'none';
-            } else {
-                showToast(`⚠️ Saldo minado insuficiente. Cuesta $${currentPurchaseCost} USD.`);
-            }
+            } else showToast(`⚠️ Saldo minado insuficiente. Cuesta $${currentPurchaseCost} USD.`);
         }
 
         function payWithDeposit() {
             document.getElementById('purchaseOptionsOverlay').style.display = 'none';
-            
             document.getElementById('modalPlanName').innerText = currentPurchaseName;
             document.getElementById('modalPlanCost').innerText = currentPurchaseCost;
-            
             document.getElementById('paymentStatusArea').style.display = 'none';
             document.getElementById('paymentInputArea').style.display = 'block';
             document.getElementById('paymentOverlay').style.display = 'flex';
@@ -890,10 +893,7 @@
             document.getElementById('paymentStatusArea').style.display = 'block';
             document.getElementById('paymentSpinner').style.display = 'block'; 
             document.getElementById('paymentSuccessIcon').style.display = 'none';
-            
-            const statusText = document.getElementById('paymentStatusText');
-            statusText.innerHTML = `Verificando depósito...<br><span style="font-size:24px; color:#fff">$${currentPurchaseCost} USD</span>`;
-
+            document.getElementById('paymentStatusText').innerHTML = `Verificando depósito...<br><span style="font-size:24px; color:#fff">$${currentPurchaseCost} USD</span>`;
             setTimeout(() => {
                 executePurchase(currentPurchaseType, currentPurchaseId);
                 document.getElementById('paymentOverlay').style.display = 'none';
@@ -902,21 +902,19 @@
 
         function executePurchase(type, id) {
             if(type === 'tier') {
-                // VERIFICACIÓN DEL ADMINISTRADOR REQUERIDA
                 user.pendingTiers.push(id);
-                saveProgress();
-                renderTiers();
+                addHistoryRecord('deposit_pending', `Compra ${currentPurchaseName}`, currentPurchaseCost);
+                saveProgress(); renderTiers();
                 showToast('⏳ <b>En Revisión Root</b><br>El minero pasará a validación por el Administrador.');
             } else if(type === 'boost') {
                 const boost = paidBoosts.find(b => b.id === id);
                 user.bonusHashrate += boost.boost;
-                saveProgress();
-                showToast(`🚀 ¡Compraste ${boost.name}! (+${boost.boost} TH/s)`);
+                addHistoryRecord('activation', `Boost: ${currentPurchaseName}`, currentPurchaseCost);
+                saveProgress(); showToast(`🚀 ¡Compraste ${boost.name}! (+${boost.boost} TH/s)`);
             } else if(type === 'multimine') {
                 user.multiMiningUnlocked = true;
-                updateMultiMineUI();
-                saveProgress();
-                showToast("🔓 ¡Multi-Minería Desbloqueada! Ahora minas BTC, LTC y DASH simultáneamente.");
+                addHistoryRecord('activation', `Unlock Multi-Minería`, currentPurchaseCost);
+                updateMultiMineUI(); saveProgress(); showToast("🔓 ¡Multi-Minería Desbloqueada!");
             }
         }
 
@@ -929,10 +927,8 @@
             const btn = document.getElementById('btnMultiMine');
             const status = document.getElementById('multiMineStatus');
             if(user.multiMiningUnlocked) {
-                btn.innerText = "✅ Multi-Minería Activa";
-                btn.disabled = true;
-                status.innerText = "Minando todas las monedas al mismo tiempo.";
-                status.style.color = "var(--success)";
+                btn.innerText = "✅ Multi-Minería Activa"; btn.disabled = true;
+                status.innerText = "Minando todas las monedas al mismo tiempo."; status.style.color = "var(--success)";
             }
         }
 
@@ -942,8 +938,7 @@
             document.getElementById(`btn-${coinSymbol}`).classList.add('active');
             document.getElementById('balanceLabel').innerText = `Saldo Minado (${coinSymbol})`;
             document.getElementById('coinIconFront').innerText = cryptoData[coinSymbol].icon;
-            updateUIBalance();
-            saveProgress();
+            updateUIBalance(); saveProgress();
         }
 
         // ==========================================
@@ -953,58 +948,98 @@
             const now = Date.now();
             if(now - user.lastSpinDate < 86400000) { 
                 const msLeft = 86400000 - (now - user.lastSpinDate);
-                showToast(`⏳ Vuelve en ${Math.floor(msLeft/3600000)}h para girar.`);
-                return;
+                showToast(`⏳ Vuelve en ${Math.floor(msLeft/3600000)}h para girar.`); return;
             }
-            
             const wheel = document.getElementById('rouletteWheel');
-            document.getElementById('btnSpin').disabled = true;
-            document.getElementById('btnSpin').innerText = "GIRANDO...";
+            document.getElementById('btnSpin').disabled = true; document.getElementById('btnSpin').innerText = "GIRANDO...";
             
             wheel.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.3, 1)';
-            wheel.style.transform = `rotate(${(360 * 6) + 330}deg)`; // Fuerza caer en +0.05 TH/s por defecto
+            wheel.style.transform = `rotate(${(360 * 6) + 330}deg)`; 
             
             setTimeout(() => {
-                user.bonusHashrate += 0.05; 
-                user.lastSpinDate = Date.now();
-                saveProgress();
-                
+                user.bonusHashrate += 0.05; user.lastSpinDate = Date.now(); saveProgress();
                 document.getElementById('rouletteModal').style.display = 'none';
-                document.getElementById('btnSpin').disabled = false;
-                document.getElementById('btnSpin').innerText = "GIRAR RULETA";
-                wheel.style.transition = 'none'; 
-                wheel.style.transform = `rotate(0deg)`;
-                
+                document.getElementById('btnSpin').disabled = false; document.getElementById('btnSpin').innerText = "GIRAR RULETA";
+                wheel.style.transition = 'none'; wheel.style.transform = `rotate(0deg)`;
                 showToast('🎰 <b>¡Ganaste en la Ruleta!</b><br>Se han añadido +0.05 TH/s a tu cuenta.');
             }, 5200);
         }
 
         // ==========================================
-        // SISTEMA DE REFERIDOS (3 NIVELES)
+        // REFERIDOS (3 NIVELES EXACTO)
         // ==========================================
         function openReferrals() {
             if(!user) return;
             const uidStr = user.idUsuario || (user.uid ? user.uid.slice(0,8).toUpperCase() : "INVITADO");
-            
-            // LINK EXACTO CON TU GITHUB
             document.getElementById('refLinkInput').value = `https://malenahahs-bit.github.io/win-miner-pro/?ref=${uidStr}`;
-            
             document.getElementById('refCount1').innerText = user.referrals.lvl1 || 0;
             document.getElementById('refCount2').innerText = user.referrals.lvl2 || 0;
             document.getElementById('refCount3').innerText = user.referrals.lvl3 || 0;
-            
             document.getElementById('referralModal').style.display = 'flex';
         }
 
         function copyRefLink() {
             const copyText = document.getElementById("refLinkInput");
-            copyText.select();
-            document.execCommand("copy");
+            copyText.select(); document.execCommand("copy");
             showToast("✅ <b>Enlace Copiado</b><br>Compártelo para ganar referidos.");
         }
 
         // ==========================================
-        // MOTOR DE MINERÍA Y BALANCE
+        // HISTORIAL DE TRANSACCIONES
+        // ==========================================
+        let currentHistoryPage = 1; const itemsPerPage = 7;
+        
+        function addHistoryRecord(type, detail, amount) {
+            if(!user.systemHistory) user.systemHistory = [];
+            user.systemHistory.push({ type: type, detail: detail, amount: amount.toFixed(2), date: new Date().toLocaleString() });
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const tbody = document.getElementById('historyTableBody');
+            if(!tbody) return; tbody.innerHTML = '';
+            
+            if(!user || !user.systemHistory || user.systemHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--text-muted);">Sin transacciones</td></tr>';
+                document.getElementById('totalRecordsLabel').innerText = "0"; return;
+            }
+            
+            const historyReversed = [...user.systemHistory].reverse();
+            document.getElementById('totalRecordsLabel').innerText = `${historyReversed.length} Registros`;
+            const totalPages = Math.ceil(historyReversed.length / itemsPerPage) || 1;
+            if(currentHistoryPage > totalPages) currentHistoryPage = totalPages;
+            if(currentHistoryPage < 1) currentHistoryPage = 1;
+            document.getElementById('pageIndicator').innerText = `${currentHistoryPage} / ${totalPages}`;
+            document.getElementById('btnPrevPage').disabled = currentHistoryPage === 1;
+            document.getElementById('btnNextPage').disabled = currentHistoryPage === totalPages;
+            
+            const startIdx = (currentHistoryPage - 1) * itemsPerPage;
+            const pageItems = historyReversed.slice(startIdx, startIdx + itemsPerPage);
+            
+            pageItems.forEach(item => {
+                let badgeColor = item.type === 'deposit_pending' ? '#f59e0b' : (item.type === 'withdraw' ? '#10b981' : '#3b82f6');
+                let badgeBg = item.type === 'deposit_pending' ? 'rgba(245,158,11,0.2)' : (item.type === 'withdraw' ? 'rgba(16,185,129,0.2)' : 'rgba(59,130,246,0.2)');
+                let badgeText = item.type === 'deposit_pending' ? 'Revisión' : (item.type === 'withdraw' ? 'Retiro' : 'Upgrade');
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="padding:12px; border-bottom: 1px solid rgba(255,255,255,0.02);">
+                            <span style="background:${badgeBg}; color:${badgeColor}; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:bold;">${badgeText}</span>
+                        </td>
+                        <td style="padding:12px; border-bottom: 1px solid rgba(255,255,255,0.02); max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            ${item.detail || 'Transacción'}
+                        </td>
+                        <td class="mono" style="padding:12px; border-bottom: 1px solid rgba(255,255,255,0.02); color:var(--success); font-weight:bold;">
+                            $${item.amount}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        function changePage(dir) { currentHistoryPage += dir; renderHistory(); }
+
+        // ==========================================
+        // MOTOR DE MINERÍA, TERMINAL Y BALANCE
         // ==========================================
         function updateUIBalance() {
             const currentBal = user.balances[user.activeCoin];
@@ -1020,6 +1055,12 @@
             document.getElementById('progFill').style.width = `${pct > 100 ? 100 : pct}%`;
         }
 
+        const terminalLogs = [
+            "Conectando a Stratum V2...", "Verificando firmas SHA-256...", "Bloque detectado en la red...",
+            "Sincronizando mempool...", "Ping: 12ms | Latencia óptima.", "Descifrando algoritmos de hash...",
+            "Aceptando Nonce válido...", "Petición P2P respondida exitosamente."
+        ];
+
         let isMiningActive = false;
         function startMiningLoop() {
             if(isMiningActive) return;
@@ -1028,7 +1069,6 @@
             setInterval(() => {
                 const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
                 const activeCoins = user.multiMiningUnlocked ? ['BTC', 'LTC', 'DASH'] : [user.activeCoin];
-                
                 let displayRateForActive = 0;
 
                 activeCoins.forEach(coin => {
@@ -1049,10 +1089,65 @@
 
                 document.getElementById('rateDisplay').innerText = `${displayRateForActive.toFixed(10)} /s`;
                 updateUIBalance();
+
+                // Animación de Temperatura aleatoria
+                document.getElementById('tempVal').innerText = `${Math.floor(Math.random() * 5) + 60}°C`;
+                document.getElementById('powerVal').innerText = `${Math.floor(Math.random() * 10) + 85}%`;
+
             }, 1000);
 
-            // Guardar progreso cada 15 segundos en Firebase
+            // Actualizar Terminal
+            setInterval(() => {
+                const logBox = document.getElementById('terminalLog');
+                if(!logBox) return;
+                if(logBox.children.length > 4) logBox.removeChild(logBox.firstChild);
+                const newLine = document.createElement('div');
+                newLine.className = 'term-line';
+                newLine.innerText = `[SYS] ${terminalLogs[Math.floor(Math.random() * terminalLogs.length)]}`;
+                logBox.appendChild(newLine);
+            }, 3000);
+
             setInterval(() => { saveProgress(); }, 15000);
+        }
+
+        // ==========================================
+        // SISTEMA FOMO Y LLUVIA DE DINERO
+        // ==========================================
+        const fomoNames = ["0x4A2...", "1Bz8...", "0x99D...", "T9aR...", "bc1q..."];
+        let isFomoActive = false;
+        
+        function startFomoSystem() {
+            if(isFomoActive) return;
+            isFomoActive = true;
+            setInterval(() => {
+                if(Math.random() > 0.4) { 
+                    const randomName = fomoNames[Math.floor(Math.random() * fomoNames.length)];
+                    const randomAmt = Math.floor(Math.random() * 80) + 15; 
+                    const container = document.getElementById('fomo-container');
+                    if(!container) return;
+                    
+                    const popup = document.createElement('div');
+                    popup.style.cssText = "background: #064e3b; border: 1px solid #059669; color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: all 0.5s;";
+                    popup.innerHTML = `<span style="font-size: 18px;">💸</span> <div><b>Retiro Exitoso</b><br>${randomName} retiró $${randomAmt} USD.</div>`;
+                    
+                    container.appendChild(popup);
+                    setTimeout(() => { popup.style.opacity = '0'; setTimeout(() => popup.remove(), 500); }, 5000);
+                }
+            }, 20000);
+        }
+        setTimeout(startFomoSystem, 5000);
+
+        function triggerMoneyRain() {
+            const rc = document.getElementById('moneyRainContainer');
+            rc.style.display = 'block';
+            for(let i=0; i<40; i++) {
+                const m = document.createElement('div');
+                m.innerText = '💸';
+                m.style.cssText = `position:absolute; top:-50px; font-size:35px; left:${Math.random() * 100}vw; transition: transform ${Math.random() * 2 + 2}s linear ${Math.random() * 1.5}s;`;
+                rc.appendChild(m);
+                setTimeout(() => m.style.transform = `translateY(110vh) rotate(360deg)`, 50);
+            }
+            setTimeout(() => { rc.innerHTML = ''; rc.style.display = 'none'; }, 5000);
         }
 
         // ==========================================
