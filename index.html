@@ -2,41 +2,30 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- META TAGS PARA EXPERIENCIA NATIVA ANDROID/IOS -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#030406">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>WIN-MINER-PRO - Industrial Mining</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WIN-MINER-PRO - Industrial Mining Command Center</title>
     
-    <!-- LIBRERÍAS DE FUENTES E ÍCONOS NATIVOS DE ANDROID (MATERIAL DESIGN 3) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
-
     <!-- FIREBASE SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* --- CONFIGURACIÓN BASE Y TEMAS DINÁMICOS --- */
+        /* --- CONFIGURACIÓN BASE Y TEMAS DINÁMICOS NATIVOS --- */
         :root {
-            --bg-color: #030406;
-            --panel-bg-dark: rgba(18, 20, 24, 0.65); /* Más oscuro y nativo */
-            --panel-bg-active: rgba(28, 31, 38, 0.85); 
+            --bg-color: #0d0f14;
+            --panel-bg-dark: #1e2128; 
+            --panel-bg-active: #2a2d35; 
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --danger: #ef4444;
-            --android-bar: rgba(3, 4, 6, 0.9);
             
             --primary: #f7931a; 
             --primary-dim: rgba(247, 147, 26, 0.15);
             --success: #10b981;
             --matrix-color: #00FF41;
             --glow-intensity: 15px;
-            --rig-frame: rgba(28, 31, 38, 0.8);
+            --rig-frame: #2c313c;
             --video-filter: contrast(1) brightness(1);
         }
 
@@ -45,7 +34,7 @@
             --primary-dim: rgba(59, 130, 246, 0.25); 
             --matrix-color: #3b82f6; 
             --glow-intensity: 25px; 
-            --rig-frame: rgba(59, 130, 246, 0.4); 
+            --rig-frame: #3b82f6; 
             --video-filter: contrast(1.1) brightness(1.05); 
         }
         body[data-tier="3"] { 
@@ -53,7 +42,7 @@
             --primary-dim: rgba(139, 92, 246, 0.3); 
             --matrix-color: #8b5cf6; 
             --glow-intensity: 35px; 
-            --rig-frame: rgba(139, 92, 246, 0.5); 
+            --rig-frame: #8b5cf6; 
             --video-filter: contrast(1.15) brightness(1.1); 
         }
         body[data-tier="4"] { 
@@ -61,7 +50,7 @@
             --primary-dim: rgba(239, 68, 68, 0.35); 
             --matrix-color: #ef4444; 
             --glow-intensity: 50px; 
-            --rig-frame: rgba(239, 68, 68, 0.7); 
+            --rig-frame: #ef4444; 
             --video-filter: contrast(1.2) brightness(1.15); 
         }
 
@@ -69,10 +58,15 @@
             margin: 0; 
             padding: 0; 
             box-sizing: border-box; 
-            font-family: 'Inter', sans-serif; /* Fuente nativa de Android/UI */
-            -webkit-tap-highlight-color: transparent; /* Quita el destello azul en móviles */
+            font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Segoe UI', sans-serif;
+            font-size: 14px; 
+            -webkit-tap-highlight-color: transparent;
         }
         
+        .mono {
+            font-family: 'Fira Code', monospace;
+        }
+
         body { 
             background-color: var(--bg-color); 
             color: var(--text-main); 
@@ -83,18 +77,8 @@
             display: flex; 
             flex-direction: column; 
             transition: all 0.5s ease; 
-            user-select: none; /* Comportamiento nativo de app */
-        }
-
-        input, textarea {
-            user-select: auto;
-            font-family: 'Inter', sans-serif;
         }
         
-        .monospace {
-            font-family: 'Fira Code', monospace;
-        }
-
         #matrixCanvas { 
             position: absolute; 
             top: 0; 
@@ -102,9 +86,52 @@
             width: 100%; 
             height: 100%; 
             z-index: 0; 
-            opacity: 1; 
+            opacity: 0.6; /* Un poco menos opaco para dar protagonismo a las tarjetas */
         }
         
+        /* DISEÑO DE TARJETAS SÓLIDAS ESTILO ANDROID MATERIAL */
+        .card { 
+            background-color: var(--panel-bg-dark); 
+            border-radius: 16px; 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); 
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .panel-header { 
+            padding: 16px 20px; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(0,0,0,0.2); 
+        }
+
+        .panel-header h2 { 
+            font-size: 14px; 
+            color: var(--text-main); 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            font-weight: 700;
+        }
+
+        .panel-content { 
+            padding: 20px; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px;
+        }
+
+        /* --- BOTONERA INFERIOR MÓVIL (NATIVE ANDROID FEEL) --- */
+        .mobile-bottom-nav {
+            display: none;
+        }
+
+        /* DASHBOARD GRID DESKTOP */
         .dashboard { 
             position: relative; 
             z-index: 1; 
@@ -112,434 +139,437 @@
             height: 100vh; 
             margin: 0 auto; 
             display: grid; 
-            grid-template-columns: 350px 1fr 350px; 
+            grid-template-columns: 320px 1fr 320px; 
             gap: 20px; 
             padding: 20px; 
             overflow-y: auto; 
-            padding-top: calc(20px + env(safe-area-inset-top)); /* Para el Notch de iPhone */
         }
 
-        /* Ocultar barra de desplazamiento para un look más nativo */
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        .tab-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+        }
+
+        /* MEDIA QUERY PARA TELÉFONOS */
+        @media (max-width: 1000px) {
+            .dashboard { 
+                display: block; 
+                padding: 15px;
+                padding-bottom: 90px; /* Espacio para el nav */
+            }
+            
+            .tab-pane {
+                display: none; /* Oculta todas por defecto en celular */
+                animation: fadeInTab 0.3s ease;
+            }
+            .tab-pane.active {
+                display: flex; /* Muestra solo la activa */
+            }
+
+            .mobile-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0; left: 0; width: 100%;
+                background: #15181e;
+                border-top: 1px solid rgba(255,255,255,0.05);
+                z-index: 10000;
+                padding-bottom: env(safe-area-inset-bottom);
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.6);
+            }
+
+            .nav-btn {
+                flex: 1; 
+                background: transparent; 
+                border: none;
+                color: #64748b; 
+                padding: 12px 0; 
+                font-size: 10px;
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                gap: 5px;
+                font-weight: bold; 
+                transition: 0.3s;
+            }
+
+            .nav-btn.active { 
+                color: var(--primary); 
+            }
+
+            .nav-btn svg { 
+                width: 24px; 
+                height: 24px; 
+                stroke: currentColor; 
+                fill: none; 
+                stroke-width: 2; 
+                stroke-linecap: round; 
+                stroke-linejoin: round; 
+            }
+        }
+
+        @keyframes fadeInTab { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
 
         /* --- NUEVO SISTEMA DE VERIFICACIÓN SOFISTICADO --- */
         .register-only { display: none; }
         
-        .verification-container { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; width: 100%; }
-        .tech-spinner-wrapper { position: relative; width: 140px; height: 140px; margin: 0 auto 30px auto; }
-        .tech-spinner-ring1 { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 4px solid transparent; border-top-color: var(--success); border-bottom-color: var(--success); border-radius: 50%; animation: spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); }
-        .tech-spinner-ring2 { position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px; border: 2px dashed rgba(255, 255, 255, 0.4); border-radius: 50%; animation: spin 4s linear infinite reverse; }
-        .tech-spinner-core { position: absolute; top: 40px; left: 40px; right: 40px; bottom: 40px; background: var(--success); border-radius: 50%; box-shadow: 0 0 30px var(--success); animation: pulseCore 1.5s ease-in-out infinite; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #000; }
-        .verification-text { color: var(--success); font-size: 18px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; text-shadow: 0 0 15px rgba(16, 185, 129, 0.6); animation: blinkText 1.5s infinite; }
+        .verification-container {
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 0;
+            width: 100%;
+        }
+
+        .tech-spinner-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 30px auto;
+        }
+
+        .tech-spinner-ring1 {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            border: 4px solid transparent;
+            border-top-color: var(--success);
+            border-bottom-color: var(--success);
+            border-radius: 50%;
+            animation: spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        }
+
+        .tech-spinner-ring2 {
+            position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 2px dashed rgba(255, 255, 255, 0.4); border-radius: 50%;
+            animation: spin 4s linear infinite reverse;
+        }
+
+        .tech-spinner-core {
+            position: absolute; top: 40px; left: 40px; right: 40px; bottom: 40px;
+            background: var(--success); border-radius: 50%;
+            box-shadow: 0 0 30px var(--success);
+            animation: pulseCore 1.5s ease-in-out infinite;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: #000;
+        }
+
+        .verification-text {
+            color: var(--success); font-size: 18px; font-weight: bold;
+            letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px;
+            text-shadow: 0 0 15px rgba(16, 185, 129, 0.6); animation: blinkText 1.5s infinite;
+        }
+
         .verification-subtext { color: var(--text-muted); font-size: 13px; line-height: 1.6; }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes pulseCore { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.3); opacity: 1; } }
         @keyframes blinkText { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         
-        .card { 
-            background-color: var(--panel-bg-dark); 
-            backdrop-filter: blur(16px); 
-            -webkit-backdrop-filter: blur(16px); 
-            border-radius: 28px; /* Estilo Material Design 3 */
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            display: flex; 
-            flex-direction: column; 
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05); 
-        }
-        .panel-header { 
-            padding: 20px 24px; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .panel-header h2 { 
-            font-size: 14px; 
-            color: var(--text-main); 
-            font-weight: 800;
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-        }
-        .panel-content { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 15px;}
-
         /* --- CONTROLES Y BALANCE --- */
-        .crypto-selector { display: flex; gap: 10px; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .crypto-btn { flex: 1; padding: 12px; background: transparent; border: none; color: var(--text-muted); border-radius: 16px; cursor: pointer; transition: 0.3s; font-weight: 800; font-size: 13px; }
-        .crypto-btn.active { background: var(--primary); color: #000; box-shadow: 0 0 var(--glow-intensity) var(--primary-dim); }
-        .balance-main { text-align: center; padding: 30px 0; border-radius: 20px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.03);}
-        .balance-main .label { color: var(--text-muted); font-size: 12px; font-weight: 600; }
-        .balance-main .amount { font-size: 38px; font-weight: 900; color: var(--primary); font-family: 'Fira Code', monospace; text-shadow: 0 0 var(--glow-intensity) var(--primary-dim); margin: 5px 0;}
-        .balance-main .usd { color: var(--success); font-size: 18px; font-weight: 800; }
+        .crypto-selector { 
+            display: flex; gap: 10px; background: rgba(0,0,0,0.3); 
+            padding: 6px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); 
+        }
+        .crypto-btn { 
+            flex: 1; padding: 12px 10px; background: transparent; border: none; 
+            color: var(--text-muted); border-radius: 8px; cursor: pointer; 
+            transition: 0.3s; font-weight: bold; 
+        }
+        .crypto-btn.active { 
+            background: var(--primary); color: #000; 
+            box-shadow: 0 4px 10px var(--primary-dim); 
+        }
+        .balance-main { 
+            text-align: center; padding: 25px 0; border-radius: 12px; 
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.03);
+        }
+        .balance-main .label { color: var(--text-muted); font-size: 12px; }
+        .balance-main .amount { 
+            font-size: 34px; font-weight: bold; color: var(--primary); 
+            text-shadow: 0 0 var(--glow-intensity) var(--primary-dim); margin: 5px 0;
+        }
+        .balance-main .usd { color: var(--success); font-size: 16px; font-weight: bold; }
         
         /* BARRA DE PROGRESO PSICOLÓGICA */
-        .progress-container { margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
-        .progress-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;}
-        .progress-track { width: 100%; height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden; position: relative;}
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--danger), var(--primary)); width: 0%; transition: width 0.5s ease; box-shadow: 0 0 10px var(--primary);}
-        .gas-fee-label { font-size: 11px; color: var(--danger); text-align: center; margin-top: 8px; font-weight: 800;}
+        .progress-container { 
+            margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.3); 
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); 
+        }
+        .progress-header { 
+            display: flex; justify-content: space-between; font-size: 11px; 
+            color: var(--text-muted); margin-bottom: 8px; font-weight: bold;
+        }
+        .progress-track { 
+            width: 100%; height: 10px; background: #000; 
+            border-radius: 5px; overflow: hidden; position: relative;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .progress-fill { 
+            height: 100%; background: linear-gradient(90deg, var(--danger), var(--primary)); 
+            width: 0%; transition: width 0.5s ease; box-shadow: 0 0 10px var(--primary);
+        }
+        .gas-fee-label { 
+            font-size: 11px; color: var(--danger); text-align: center; 
+            margin-top: 8px; font-weight: bold;
+        }
 
-        .withdraw-config { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; margin-top: 10px; }
-        .withdraw-config h3 { font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; text-align: center; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;}
-        .payment-select, .wallet-input { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 14px; outline: none; font-family: 'Fira Code', monospace; font-size: 13px; transition: border-color 0.3s;}
-        .payment-select:focus, .wallet-input:focus { border-color: var(--primary); }
+        .withdraw-config { 
+            border-top: 1px solid rgba(255,255,255,0.05); 
+            padding-top: 15px; margin-top: 5px; 
+        }
+        .withdraw-config h3 { 
+            font-size: 12px; color: var(--text-muted); margin-bottom: 12px; text-align: center; font-weight: bold;
+        }
+        .input-group { margin-bottom: 12px; }
+        .input-group label { 
+            display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold;
+        }
+        .payment-select, .wallet-input { 
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.4); 
+            border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; 
+            outline: none; font-size: 13px;
+        }
         .wallet-input { color: var(--success); cursor: text;}
         
-        .btn-action { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; text-transform: uppercase; font-size: 13px; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-action:active { transform: scale(0.97); }
-        .btn-action.withdraw { background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid rgba(255,255,255,0.1); margin-top: 10px;} 
-        .btn-action.withdraw:hover { background: rgba(255,255,255,0.15); }
+        .btn-action { 
+            width: 100%; padding: 14px; border: none; border-radius: 10px; 
+            font-weight: bold; cursor: pointer; transition: all 0.2s; 
+            text-transform: uppercase; font-size: 13px; margin-top: 5px;
+        }
+        .btn-action:active { transform: scale(0.96); }
+        .btn-action.withdraw { 
+            background: #2a2d35; color: var(--text-main); 
+            border: 1px solid rgba(255,255,255,0.1); margin-top: 10px;
+        } 
         .btn-action.save-btn { background: #166534; color: white; }
 
         /* BOTÓN DE ANUNCIOS (BOOST) */
-        .btn-boost { background: linear-gradient(45deg, #8b5cf6, #3b82f6); color: white; box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); border: none; padding: 16px; border-radius: 16px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 12px; animation: pulseBoost 2s infinite; display: flex; align-items: center; justify-content: center; gap: 8px;}
-        .btn-boost:active { transform: scale(0.97); }
+        .btn-boost { 
+            background: linear-gradient(45deg, #8b5cf6, #3b82f6); 
+            color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); 
+            border: none; padding: 15px; border-radius: 12px; font-weight: bold; 
+            cursor: pointer; text-transform: uppercase; font-size: 12px; 
+            animation: pulseBoost 2s infinite;
+        }
+        .btn-boost:active { transform: scale(0.96); }
         @keyframes pulseBoost { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
         /* --- PANEL CENTRAL --- */
-        .central-panel-grid { display: flex; flex-direction: column; gap: 20px; height: 100%; }
-        .rig-visual-panel { background-color: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.04); display: grid; grid-template-rows: auto auto; gap: 20px; }
-        .cortex-module { background-color: #05070a; border-radius: 16px; border: 1px solid var(--rig-frame); position: relative; overflow: hidden; box-shadow: 0 0 30px var(--primary-dim), inset 0 0 40px rgba(0,0,0,0.9); height: 250px; transition: all 0.5s ease; }
+        .rig-visual-panel { 
+            background-color: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px; 
+            border: 1px solid rgba(255, 255, 255, 0.04); display: grid; gap: 15px; 
+        }
+        .cortex-module { 
+            background-color: #05070a; border-radius: 12px; border: 2px solid var(--rig-frame); 
+            position: relative; overflow: hidden; box-shadow: 0 0 30px var(--primary-dim), inset 0 0 40px rgba(0,0,0,0.9); 
+            height: 220px; transition: all 0.5s ease; 
+        }
         .video-avatar-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: flex; justify-content: center; align-items: center;}
         #minerVideo { width: 100%; height: 100%; object-fit: cover; filter: var(--video-filter); transition: filter 0.5s ease; z-index: 1;}
         #videoErrorMsg { display: none; position: absolute; z-index: 5; color: #ef4444; font-weight: bold; text-align: center; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; border: 1px solid #ef4444; animation: pulseError 1s infinite; }
         
-        .rotating-mining-card { width: 120px; height: 120px; perspective: 1000px; z-index: 2; display: none; }
+        .rotating-mining-card { width: 100px; height: 100px; perspective: 1000px; z-index: 2; display: none; }
         .card-inner { width: 100%; height: 100%; transition: transform 1s; transform-style: preserve-3d; animation: rotateCard 4s infinite linear; }
         @keyframes rotateCard { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; border-radius: 50%; border: 4px solid var(--primary); background: rgba(0,0,0,0.8); box-shadow: 0 0 25px var(--primary-dim); font-size: 55px; color: var(--primary); font-weight: bold; }
+        .card-front, .card-back { 
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+            display: flex; justify-content: center; align-items: center; border-radius: 50%; 
+            border: 4px solid var(--primary); background: rgba(0,0,0,0.8); 
+            box-shadow: 0 0 25px var(--primary-dim); font-size: 50px; color: var(--primary); font-weight: bold; 
+        }
         .card-back { transform: rotateY(180deg); font-size: 16px; border-color: var(--success); color: var(--success); }
         .video-overlay-scanline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06)); background-size: 100% 4px, 3px 100%; z-index: 2; pointer-events: none; mix-blend-mode: overlay; }
 
-        .h-meter-advanced { position: absolute; top: 15px; right: 15px; width: 140px; background: rgba(0,0,0,0.6); border: 1px solid var(--primary-dim); border-radius: 12px; padding: 10px; z-index: 3; backdrop-filter: blur(10px); text-align: center;}
-        .h-meter-title { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px;}
-        .gauge-svg { width: 100%; height: 50px; overflow: visible;}
-        .hardware-core-label { position: absolute; bottom: 15px; left: 20px; display: flex; align-items: baseline; gap: 8px; z-index: 3; background: rgba(0,0,0,0.7); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(8px);}
-        .hardware-core-label span { color: var(--primary); font-size: 11px; font-weight: 800; letter-spacing: 1px;}
+        .h-meter-advanced { 
+            position: absolute; top: 15px; right: 15px; width: 130px; 
+            background: rgba(0,0,0,0.6); border: 1px solid var(--primary-dim); 
+            border-radius: 10px; padding: 10px; z-index: 3; backdrop-filter: blur(5px); text-align: center;
+        }
+        .h-meter-title { font-size: 9px; color: var(--text-muted); font-weight: bold; margin-bottom: 5px; }
+        .gauge-svg { width: 100%; height: 45px; overflow: visible;}
+        .hardware-core-label { 
+            position: absolute; bottom: 15px; left: 15px; display: flex; align-items: baseline; gap: 8px; 
+            z-index: 3; background: rgba(0,0,0,0.8); padding: 6px 12px; border-radius: 8px; 
+            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px);
+        }
+        .hardware-core-label span { color: var(--primary); font-size: 11px; font-weight: bold;}
         
         .command-ui-modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .ui-stat-module { background-color: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; position: relative; }
-        .ui-stat-module span.label { display: block; color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;}
+        .ui-stat-module { background-color: #1e2128; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .ui-stat-module span.label { display: block; color: var(--text-muted); font-size: 10px; font-weight: bold; margin-bottom: 5px;}
         .ui-stat-module strong { font-size: 16px; color: var(--text-main); font-family: 'Fira Code', monospace; }
 
-        .history-section { background-color: var(--panel-bg-dark); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05); flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 250px; }
-        
         /* Botón Cerrar Sesión */
-        .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 14px 15px; border-radius: 16px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: all 0.2s; margin-top: auto; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px;}
-        .btn-logout:active { transform: scale(0.97); }
-        .history-header { padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); }
+        .btn-logout { 
+            background: #2a2d35; border: 1px solid var(--danger); color: var(--danger); 
+            padding: 12px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; 
+            text-transform: uppercase; transition: all 0.2s; margin-top: auto; display: flex; 
+            justify-content: center; align-items: center; gap: 8px; 
+        }
+        .btn-logout:active { transform: scale(0.96); background: rgba(239, 68, 68, 0.15); }
+        
+        /* --- HISTORIAL (TABLA) --- */
+        .history-header { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: bold; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); }
         .history-table-container { flex: 1; overflow-y: auto; }
         .history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .history-table th, .history-table td { padding: 16px 20px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.02); }
-        .history-table th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 10px;}
-        .history-table tr:hover { background: rgba(255,255,255,0.03); }
-        .badge-type { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase;}
+        .history-table th, .history-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.02); }
+        .history-table th { color: var(--text-muted); font-weight: normal; font-size: 11px; }
+        .badge-type { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: bold;}
         .type-activation { background: rgba(247, 147, 26, 0.2); color: #f7931a; border: 1px solid rgba(247, 147, 26, 0.4);}
         .type-withdraw { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4);}
-        .pagination-controls { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
-        .page-btn { background: rgba(255,255,255,0.05); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s; }
+        .pagination-controls { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
+        .page-btn { background: #2a2d35; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .page-btn:active:not(:disabled) { transform: scale(0.95); }
         .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
         
-        /* --- PANEL DERECHO (TARJETAS PROFESIONALES) --- */
-        .right-column { display: flex; flex-direction: column; gap: 15px; padding-right: 5px; }
+        /* --- PANEL DERECHO (TIENDA Y CALCULADORA) --- */
         .tiers-list { padding-right: 5px;}
         .tier-card { 
-            background: linear-gradient(145deg, rgba(20, 24, 31, 0.9), rgba(10, 12, 16, 0.95)); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 24px; 
-            padding: 24px; 
+            background: #15181e; /* Color nativo oscuro solido */
+            border: 1px solid #2a2d35; 
+            border-radius: 16px; 
+            padding: 20px; 
             margin-bottom: 15px; 
             cursor: pointer; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            transition: all 0.3s; 
             position: relative; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
             overflow: hidden; 
         }
         .tier-card::before { 
-            content: ''; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 4px; 
-            background: linear-gradient(90deg, transparent, var(--text-muted), transparent); 
-            opacity: 0.3; 
-            transition: 0.3s; 
-        }
-        .tier-card:hover:not(.active):not(.locked) { 
-            transform: translateY(-5px) scale(1.02); 
-            border-color: rgba(255,255,255,0.2); 
-            box-shadow: 0 15px 30px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255,0.05); 
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; 
+            background: var(--text-muted); opacity: 0.3; transition: 0.3s; 
         }
         .tier-card.active { 
-            border-color: var(--primary); 
-            background: linear-gradient(145deg, rgba(28, 32, 40, 0.9), var(--primary-dim)); 
-            box-shadow: 0 0 25px var(--primary-dim); 
+            border-color: var(--primary); background: #1c1a17; 
+            box-shadow: 0 4px 15px var(--primary-dim); 
         }
-        .tier-card.active::before { 
-            background: linear-gradient(90deg, transparent, var(--primary), transparent); 
-            opacity: 1; 
-        }
-        .tier-card.locked { 
-            opacity: 0.6; 
-            filter: grayscale(50%); 
-        }
+        .tier-card.active::before { background: var(--primary); opacity: 1; }
+        .tier-card.locked { opacity: 0.6; filter: grayscale(50%); }
         .tier-card.locked::after { 
-            content: '🔒 BLOQUEADO'; 
-            position: absolute; 
-            top: 15px; 
-            right: 15px; 
-            font-size: 10px; 
-            color: var(--text-muted); 
-            background: rgba(0,0,0,0.8); 
-            padding: 6px 10px; 
-            border-radius: 8px; 
-            font-weight: 800; 
-            border: 1px solid rgba(255,255,255,0.1); 
+            content: '🔒 BLOQUEADO'; position: absolute; top: 15px; right: 15px; 
+            font-size: 10px; color: var(--text-muted); background: rgba(0,0,0,0.8); 
+            padding: 4px 8px; border-radius: 6px; font-weight: bold; 
         }
-        .tier-card h3 { 
-            font-size: 20px; 
-            font-weight: 900; 
-            margin-bottom: 15px; 
-            color: #fff; 
-            letter-spacing: -0.5px; 
-        }
+        .tier-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: #fff; }
         .tier-card.active h3::after { 
-            content: '✓ ACTIVO'; 
-            position: absolute; 
-            right: 15px; 
-            top: 20px; 
-            font-size: 10px; 
-            padding: 5px 10px; 
-            background: var(--primary); 
-            color: #000; 
-            border-radius: 20px; 
-            font-weight: 900; 
-            letter-spacing: 1px; 
+            content: '✓ ACTIVO'; position: absolute; right: 15px; top: 20px; 
+            font-size: 9px; padding: 4px 8px; background: var(--primary); 
+            color: #000; border-radius: 20px; font-weight: 900; 
         }
         .tier-cost-line { 
-            color: var(--success); 
-            font-weight: 900; 
-            font-size: 24px; 
-            margin-top: 15px; 
-            border-top: 1px solid rgba(255,255,255,0.05); 
-            padding-top: 15px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+            color: var(--success); font-weight: 900; font-size: 20px; margin-top: 15px; 
+            border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; 
+            display: flex; justify-content: space-between; align-items: center; 
         }
         .tier-cost-btn { 
-            background: rgba(255,255,255,0.1); 
-            color: white; 
-            border: none; 
-            padding: 10px 18px; 
-            border-radius: 12px; 
-            font-size: 11px; 
-            text-transform: uppercase; 
-            font-weight: 800; 
-            transition: 0.3s; 
+            background: #2a2d35; color: white; border: none; padding: 8px 16px; 
+            border-radius: 8px; font-size: 11px; font-weight: bold; transition: 0.3s; 
         }
-        .tier-card:hover:not(.active):not(.locked) .tier-cost-btn { 
-            background: var(--success); 
-            color: black; 
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); 
-        }
+        .tier-card:active:not(.active):not(.locked) { transform: scale(0.98); }
 
-        /* --- UI DE LOGIN & REGISTER (MATERIAL 3) --- */
-        .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .auth-card { background: rgba(18, 20, 24, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); border-radius: 32px; padding: 40px 30px; width: 90%; max-width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(247, 147, 26, 0.05); text-align: center; }
-        .auth-card h2 { color: var(--primary); margin-bottom: 5px; font-size: 28px; font-weight: 900; letter-spacing: -1px;}
-        .auth-input { width: 100%; padding: 18px; margin-bottom: 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 16px; outline: none; font-size: 15px; transition: border-color 0.3s;}
-        .auth-input:focus { border-color: var(--primary); background: rgba(0,0,0,0.6); }
-        .auth-btn { width: 100%; padding: 18px; background: var(--primary); color: #000; border: none; border-radius: 16px; font-weight: 900; font-size: 15px; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-bottom: 10px; margin-top: 10px;}
-        .auth-btn:active { transform: scale(0.97); }
+        /* --- UI DE LOGIN & REGISTER (FIREBASE) --- */
+        .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3, 4, 6, 0.95); backdrop-filter: blur(15px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .auth-card { background: #1e2128; border: 1px solid #2a2d35; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.8); text-align: center; }
+        .auth-card h2 { color: var(--primary); margin-bottom: 10px; font-size: 24px; font-weight: 800;}
+        .auth-input { width: 100%; padding: 16px; margin-bottom: 15px; background: #0d0f14; border: 1px solid #2a2d35; color: white; border-radius: 12px; outline: none; font-size: 14px;}
+        .auth-input:focus { border-color: var(--primary); }
+        .auth-btn { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 14px; margin-bottom: 10px;}
+        .auth-btn:active { transform: scale(0.96); }
         
-        .auth-switch-wrapper { margin-top: 25px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
-        .auth-switch-text { font-size: 13px; color: var(--text-muted); }
-        .auth-switch-btn { background: transparent; color: var(--primary); border: none; font-weight: 800; cursor: pointer; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-
+        .auth-switch-wrapper { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 12px; align-items: center; }
+        .auth-switch-text { font-size: 12px; color: var(--text-muted); }
+        .auth-switch-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 12px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 12px; text-transform: uppercase; width: 100%; }
+        
         /* --- SISTEMA DE REFERIDOS (AFILIADOS) --- */
-        .ref-card { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; margin-bottom: 15px; }
-        .ref-link-box { display: flex; gap: 10px; margin-top: 12px; }
-        .ref-input { flex: 1; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); color: var(--success); padding: 14px; border-radius: 12px; font-family: 'Fira Code', monospace; font-size: 12px; outline: none; }
-        .ref-btn { background: var(--primary); color: black; border: none; padding: 0 20px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; text-transform: uppercase;}
-        .ref-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .ref-level-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px 10px; text-align: center; transition: 0.3s;}
-        .ref-level-box span { display: block; font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
-        .ref-level-box strong { font-size: 22px; font-weight: 900; color: #fff; }
-        .ref-level-box .ref-earn { color: var(--success); font-size: 12px; margin-top: 5px; display: block; font-weight: bold;}
-        .auth-error { color: var(--danger); font-size: 13px; font-weight: 600; margin-bottom: 15px; display: none; }
+        .ref-card { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .ref-link-box { display: flex; gap: 10px; margin-top: 10px; }
+        .ref-input { flex: 1; background: #0d0f14; border: 1px solid #2a2d35; color: var(--success); padding: 12px; border-radius: 8px; font-size: 12px; outline: none; }
+        .ref-btn { background: var(--primary); color: black; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; }
+        .ref-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .ref-level-box { background: #1e2128; border: 1px solid #2a2d35; border-radius: 8px; padding: 12px; text-align: center;}
+        .ref-level-box span { display: block; font-size: 10px; color: var(--text-muted); font-weight: bold; margin-bottom: 5px; }
+        .ref-level-box strong { font-size: 18px; color: #fff; }
+        .ref-level-box .ref-earn { color: var(--success); font-size: 12px; margin-top: 5px; }
+        .auth-error { color: var(--danger); font-size: 13px; margin-bottom: 15px; display: none; font-weight: bold; }
 
-        /* --- MODALES NATIVOS --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 999; padding: 20px;}
-        .payment-modal { background: var(--panel-bg-active); border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px rgba(0,0,0,0.8); }
-        .payment-modal h3 { font-size: 20px; font-weight: 900; margin-bottom: 10px; color: var(--primary); }
-        #paymentInputArea .cost-display { font-size: 28px; font-family: 'Fira Code', monospace; font-weight: bold; margin-bottom: 25px; }
-        .modal-btns { display: flex; gap: 12px; margin-top: 30px; }
-        .btn-confirm { flex: 2; background: var(--success); color: #000; border: none; padding: 16px; border-radius: 16px; font-weight: 800; font-size: 14px; cursor: pointer;}
-        .btn-cancel { flex: 1; background: rgba(255,255,255,0.05); color: var(--text-main); border: none; padding: 16px; border-radius: 16px; font-weight: 800; font-size: 14px; cursor: pointer;}
+        /* --- MODALES Y TOAST --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 999; }
+        .payment-modal { background: #1e2128; border-radius: 20px; padding: 25px; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        .payment-modal h3 { font-size: 18px; margin-bottom: 15px; color: var(--primary); }
+        #paymentInputArea .cost-display { font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #fff; }
+        .modal-btns { display: flex; gap: 12px; margin-top: 25px; }
+        .btn-confirm { flex: 2; background: #166534; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold;}
+        .btn-cancel { flex: 1; background: #2a2d35; color: var(--text-main); border: none; padding: 14px; border-radius: 10px; font-weight: bold;}
 
+        /* MODAL 2FA */
         .tfa-modal { text-align: center; }
-        .tfa-input { width: 80%; font-size: 28px; font-weight: 900; letter-spacing: 8px; text-align: center; margin: 25px auto; padding: 20px; background: rgba(0,0,0,0.4); border: 2px solid var(--primary); color: white; border-radius: 16px; outline: none; }
+        .tfa-input { width: 70%; font-size: 28px; letter-spacing: 8px; text-align: center; margin: 20px auto; padding: 15px; background: #0d0f14; border: 1px solid var(--primary); color: white; border-radius: 12px; outline: none; }
 
-        #paymentStatusArea { display: none; text-align: center; padding: 40px 0;}
-        .payment-spinner { width: 60px; height: 60px; border: 5px solid rgba(255,255,255,0.1); border-left-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
-        #paymentSuccessIcon { font-size: 60px; display: none; margin-bottom: 20px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        #paymentStatusArea { display: none; text-align: center; padding: 30px 0;}
+        .payment-spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
+        #paymentSuccessIcon { font-size: 60px; display: none; margin-bottom: 20px; }
         #paymentStatusText { font-size: 16px; font-weight: bold; color: var(--primary); }
 
-        #toast-container { position: fixed; top: env(safe-area-inset-top, 20px); left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 10000; width: 90%; max-width: 400px;}
-        .toast { background: rgba(28, 31, 38, 0.95); backdrop-filter: blur(15px); color: #fff; padding: 16px 20px; border-radius: 16px; font-size: 14px; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 30px rgba(0,0,0,0.5); animation: toastEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, toastLeave 0.4s forwards 3.6s; display: flex; align-items: center; gap: 12px;}
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 10000; width: 90%; max-width: 400px; }
+        .toast { background: #334155; color: #fff; padding: 16px; border-radius: 12px; font-size: 13px; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: toastEnter 0.3s forwards, toastLeave 0.3s forwards 3s; }
         
-        #fomo-container { position: fixed; top: 80px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 998; }
-        .fomo-popup { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); backdrop-filter: blur(10px); color: #fff; padding: 15px; border-radius: 16px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideInLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, slideOutLeft 0.5s forwards 5s; }
-        .fomo-icon { font-size: 24px; }
+        /* SISTEMA FOMO POPUPS */
+        #fomo-container { position: fixed; top: 80px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9998; }
+        .fomo-popup { background: #064e3b; border: 1px solid #059669; color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideInLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, slideOutLeft 0.5s forwards 5s; }
+        .fomo-icon { font-size: 18px; }
         @keyframes slideInLeft { from { transform: translateX(-150%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes slideOutLeft { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-150%); opacity: 0; } }
+        @keyframes toastEnter { to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastLeave { to { opacity: 0; transform: translateY(-30px); } }
 
-        @keyframes toastEnter { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translate(-50%, 0); } }
-        @keyframes toastLeave { to { opacity: 0; transform: translate(-50%, -20px); } }
-
-        /* --- MANTENIMIENTO --- */
-        .maintenance-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3, 4, 6, 0.98); backdrop-filter: blur(20px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; text-align: center; padding: 20px; }
-        .maintenance-overlay h1 { color: var(--danger); font-size: 28px; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 0 20px rgba(239, 68, 68, 0.8); }
-        .maintenance-overlay p { color: var(--text-muted); font-size: 15px; max-width: 600px; line-height: 1.6; }
-        .maintenance-spinner { width: 80px; height: 80px; border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--danger); border-radius: 50%; animation: spin 2s linear infinite; margin-bottom: 30px; }
+        /* --- MANTENIMIENTO Y BLOQUEOS --- */
+        .maintenance-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0d0f14; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20000; text-align: center; padding: 20px; }
+        .maintenance-overlay h1 { color: var(--danger); font-size: 24px; margin-bottom: 15px; }
+        .tier-processing-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 16px; z-index: 10; }
         
-        .tier-processing-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 24px; z-index: 10; }
-        .tier-processing-overlay .payment-spinner { width: 40px; height: 40px; margin-bottom: 15px; border-width: 3px; border-left-color: var(--warning); }
-        .tier-processing-overlay p { color: var(--warning); font-size: 12px; font-weight: 800; text-transform: uppercase; text-align: center; line-height: 1.4;}
-
+        /* --- CALCULADORA --- */
         .calc-card { border-left: 4px solid var(--primary); }
         
-        .roulette-container { position: relative; width: 260px; height: 260px; margin: 0 auto 30px auto; }
-        .roulette-wheel { width: 100%; height: 100%; border-radius: 50%; border: 8px solid rgba(255,255,255,0.1); background: conic-gradient( #10b981 0deg 60deg, #ef4444 60deg 120deg, #f59e0b 120deg 180deg, #3b82f6 180deg 240deg, #f7931a 240deg 300deg, #8b5cf6 300deg 360deg ); position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.5); overflow: hidden; }
-        .roulette-wheel::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(0deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%), linear-gradient(60deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%), linear-gradient(120deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%); border-radius: 50%; pointer-events: none; }
-        .roulette-marker { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 35px solid white; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); z-index: 10; }
-        .roulette-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: #121212; border-radius: 50%; border: 4px solid var(--primary); box-shadow: 0 0 20px var(--primary); z-index: 5; display: flex; align-items: center; justify-content: center; font-size: 24px;}
-        .r-label { position: absolute; font-size: 12px; font-weight: 900; color: white; text-shadow: 1px 1px 3px black; z-index: 4; }
-        .l-win { top: 25px; left: 140px; transform: rotate(30deg); }
-        .l-lose1 { top: 110px; right: 10px; transform: rotate(90deg); }
-        .l-big1 { bottom: 25px; right: 55px; transform: rotate(150deg); }
-        .l-mid { bottom: 25px; left: 55px; transform: rotate(210deg); }
-        .l-big2 { top: 110px; left: 10px; transform: rotate(270deg); }
-        .l-lose2 { top: 25px; left: 45px; transform: rotate(330deg); }
+        /* --- RULETA MODAL --- */
+        .roulette-container { position: relative; width: 220px; height: 220px; margin: 0 auto 20px auto; }
+        .roulette-wheel { 
+            width: 100%; height: 100%; border-radius: 50%; border: 6px solid #2a2d35; 
+            background: conic-gradient( #10b981 0deg 60deg, #ef4444 60deg 120deg, #f59e0b 120deg 180deg, #3b82f6 180deg 240deg, #f7931a 240deg 300deg, #8b5cf6 300deg 360deg ); 
+            position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.8); overflow: hidden;
+        }
+        .roulette-wheel::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(0deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%),
+                              linear-gradient(60deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%),
+                              linear-gradient(120deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%);
+            border-radius: 50%; pointer-events: none;
+        }
+        .roulette-marker { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid white; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); z-index: 10; }
+        .roulette-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #1e2128; border-radius: 50%; border: 3px solid var(--primary); z-index: 5; display: flex; align-items: center; justify-content: center; font-size: 16px;}
+        .r-label { position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 1px 1px 2px black; z-index: 4; }
+        .l-win { top: 20px; left: 120px; transform: rotate(30deg); }
+        .l-lose1 { top: 90px; right: 5px; transform: rotate(90deg); }
+        .l-big1 { bottom: 20px; right: 40px; transform: rotate(150deg); }
+        .l-mid { bottom: 20px; left: 40px; transform: rotate(210deg); }
+        .l-big2 { top: 90px; left: 5px; transform: rotate(270deg); }
+        .l-lose2 { top: 20px; left: 30px; transform: rotate(330deg); }
         
-        /* --- TICKER SOCIAL --- */
-        .social-ticker { position: fixed; top: env(safe-area-inset-top, 0); left: 0; width: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 20px; font-size: 12px; color: var(--text-muted); z-index: 900; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .ticker-text { color: var(--success); font-weight: 800; animation: fadeInOut 8s infinite; }
-        @keyframes fadeInOut { 0% { opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
-
-        /* --- LLUVIA DE BILLETES --- */
         #moneyRainContainer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 10000; display: none; overflow: hidden; }
-        .money-drop { position: absolute; top: -50px; font-size: 40px; animation: fall linear forwards; }
+        .money-drop { position: absolute; top: -50px; font-size: 35px; animation: fall linear forwards; }
         @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
 
         /* --- TÉRMINOS Y CONDICIONES --- */
-        .tc-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 10001; padding: 20px;}
-        .tc-modal { background: #121418; border: 1px solid var(--danger); border-radius: 28px; padding: 30px; width: 100%; max-width: 600px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(239, 68, 68, 0.4); }
-        .tc-modal h3 { color: var(--danger); margin-bottom: 15px; font-size: 18px; font-weight: 900; text-transform: uppercase; text-align: center; letter-spacing: 1px; }
-        .tc-content { flex: 1; overflow-y: auto; color: #94a3b8; font-size: 12px; line-height: 1.6; text-align: justify; padding-right: 15px; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); padding-top: 20px; padding-bottom: 20px; margin-bottom: 20px; }
-        .tc-content strong { color: #e2e8f0; font-size: 13px; font-weight: 800;}
-        .tc-checkbox-container { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; font-size: 12px; color: var(--text-muted); text-align: left; }
-        .tc-checkbox-container input[type="checkbox"] { accent-color: var(--primary); width: 20px; height: 20px; cursor: pointer; }
-        .tc-link { color: var(--danger); text-decoration: underline; cursor: pointer; font-weight: 800; }
-
-        /* =======================================================
-           NUEVO: BOTTOM NAVIGATION Y MEDIA QUERIES (MOBILE FIRST) 
-           ======================================================= */
-        
-        .bottom-nav {
-            display: none; /* Oculto en PC */
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(18, 20, 24, 0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            z-index: 1000;
-            padding-bottom: env(safe-area-inset-bottom);
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
-        }
-
-        .bottom-nav-inner {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            height: 70px;
-            padding: 0 10px;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            color: var(--text-muted);
-            text-decoration: none;
-            flex: 1;
-            height: 100%;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .nav-item .material-symbols-rounded {
-            font-size: 26px;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .nav-item span {
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .nav-item.active {
-            color: var(--primary);
-        }
-
-        .nav-item.active .material-symbols-rounded {
-            font-size: 30px;
-            font-variation-settings: 'FILL' 1; /* Rellena el ícono al seleccionarlo */
-            transform: translateY(-2px);
-            text-shadow: 0 0 15px var(--primary-dim);
-        }
-
-        /* Lógica Visual de Tabs para Móvil */
-        @media (max-width: 1000px) {
-            .dashboard {
-                display: block; /* Quitamos el grid */
-                padding: 15px;
-                padding-top: calc(45px + env(safe-area-inset-top)); /* Espacio para el ticker */
-                padding-bottom: calc(90px + env(safe-area-inset-bottom)); /* Espacio para el bottom nav */
-            }
-            .mobile-tab {
-                display: none; /* Ocultamos todas las columnas por defecto */
-                animation: fadeUp 0.3s ease-out forwards;
-            }
-            .mobile-tab.active-tab {
-                display: flex; /* Solo mostramos la activa */
-            }
-            .bottom-nav {
-                display: block; /* Mostramos la barra inferior */
-            }
-            .card {
-                margin-bottom: 20px;
-            }
-            #fomo-container {
-                bottom: 90px; /* Subir fomo para que no tape el nav */
-            }
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        .tc-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 10001; }
+        .tc-modal { background: #1e2128; border-radius: 16px; padding: 25px; width: 90%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column; }
+        .tc-modal h3 { color: var(--danger); margin-bottom: 15px; font-size: 16px; text-transform: uppercase; text-align: center; }
+        .tc-content { flex: 1; overflow-y: auto; color: #cbd5e1; font-size: 12px; line-height: 1.5; text-align: left; padding: 10px 0; margin-bottom: 15px; }
+        .tc-checkbox-container { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 12px; color: var(--text-muted); text-align: left; }
     </style>
 </head>
 <body>
@@ -549,37 +579,35 @@
         <canvas id="coinsCanvasAuth" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:-1; opacity:0.85;"></canvas>
         <div class="auth-card" id="loginCard">
             <h2 id="authTitle">WIN-MINER-PRO</h2>
-            <p id="authSubtitle" style="color:var(--text-muted); margin-bottom:20px; font-size:13px;">Comando Industrial Mobile</p>
+            <p id="authSubtitle" style="color:var(--text-muted); margin-bottom:20px; font-size:12px;">Acceso al Panel de Comando Industrial</p>
             <div class="auth-error" id="authErrorMsg">Error de credenciales.</div>
             
             <div class="verification-container" id="verificationBlock">
                 <div class="tech-spinner-wrapper">
                     <div class="tech-spinner-ring1" id="tsRing1"></div>
                     <div class="tech-spinner-ring2" id="tsRing2"></div>
-                    <div class="tech-spinner-core" id="tsCore">
-                        <span class="material-symbols-rounded">currency_bitcoin</span>
-                    </div>
+                    <div class="tech-spinner-core" id="tsCore">₿</div>
                 </div>
-                <div class="verification-text" id="verifStatusTitle">ENCRIPTANDO...</div>
-                <div class="verification-subtext" id="verifStatusDesc">Procesando seguridad.</div>
+                <div class="verification-text" id="verifStatusTitle">ENCRIPTANDO DATOS...</div>
+                <div class="verification-subtext" id="verifStatusDesc">Procesando llaves de seguridad.</div>
             </div>
 
             <input type="text" id="authName" class="auth-input register-only" placeholder="Nombres del Inversor">
             <input type="text" id="authLastName" class="auth-input register-only" placeholder="Apellidos del Inversor">
             <input type="text" id="authDni" class="auth-input register-only" placeholder="Cédula de Identidad o DNI">
-            <input type="tel" id="authPhone" class="auth-input register-only" placeholder="Teléfono Móvil (Código País)">
+            <input type="tel" id="authPhone" class="auth-input register-only" placeholder="Teléfono Móvil (Con código de país)">
             <input type="email" id="authEmail" class="auth-input" placeholder="Correo Electrónico">
             <input type="password" id="authPassword" class="auth-input" placeholder="Contraseña Segura">
             
             <div class="tc-checkbox-container register-only" id="tcContainer" style="display: none;">
-                <input type="checkbox" id="tcCheckbox">
-                <label for="tcCheckbox">Acepto los <span class="tc-link" onclick="document.getElementById('tcModalOverlay').style.display='flex'">Términos y Condiciones</span>.</label>
+                <input type="checkbox" id="tcCheckbox" style="transform: scale(1.5);">
+                <label for="tcCheckbox">He leído y acepto los <span class="tc-link" style="color:var(--primary);" onclick="document.getElementById('tcModalOverlay').style.display='flex'">Términos y Condiciones</span>.</label>
             </div>
 
             <button class="auth-btn" id="authActionButton" onclick="loginUser()">Iniciar Sesión</button>
             
             <div class="auth-switch-wrapper auth-switch">
-                <span class="auth-switch-text" id="authSwitchPrompt">¿Aún no tienes una cuenta?</span>
+                <span class="auth-switch-text" id="authSwitchPrompt">¿Aún no tienes una cuenta de inversor?</span>
                 <button class="auth-switch-btn" id="authSwitchBtn" onclick="toggleAuthMode()">Crear Cuenta Ahora</button>
             </div>
         </div>
@@ -588,107 +616,97 @@
     <!-- MODAL DE TÉRMINOS Y CONDICIONES (KYC) -->
     <div class="tc-modal-overlay" id="tcModalOverlay">
         <div class="tc-modal">
-            <h3>Términos y Condiciones</h3>
+            <h3>Términos y Condiciones Legales</h3>
             <div class="tc-content">
-                <strong>1. ACEPTACIÓN DE LOS TÉRMINOS Y RIESGO DE INVERSIÓN</strong><br>
-                El registro implica la aceptación irrevocable. Usted comprende y acepta que toda inversión conlleva riesgos.<br><br>
-                <strong>2. MINADO EN LA NUBE</strong><br>
-                El proceso de minado se ejecuta en la nube web. No nos hacemos responsables por el desgaste de su dispositivo.<br><br>
-                <strong>3. KYC ESTRICTO</strong><br>
-                Exigiremos verificación de identidad (KYC) para retiros. Si los datos no coinciden, perderá su inversión por intento de fraude.<br><br>
-                <strong>4. SEGURIDAD DE CUENTA</strong><br>
-                Queda prohibido el cambio de correo o contraseña. Usted custodia sus credenciales.
+                <strong>1. ACEPTACIÓN DE LOS TÉRMINOS</strong><br>
+                El uso de la plataforma WIN-MINER-PRO implica la aceptación total. Usted comprende y acepta que toda inversión conlleva riesgos.<br><br>
+                <strong>2. NATURALEZA DEL SERVICIO</strong><br>
+                El minado se ejecuta en la nube, usando protocolos de simulación y derivación matemática. Es un servicio remoto.<br><br>
+                <strong>3. KYC (KNOW YOUR CUSTOMER)</strong><br>
+                La administración exige verificación de identidad para retiros. Datos falsos resultarán en pérdida irreversible de inversión.<br><br>
+                <strong>4. SEGURIDAD</strong><br>
+                Queda prohibido el cambio de correo. Es su responsabilidad custodiar sus claves.
             </div>
-            <button class="btn-action save-btn" onclick="document.getElementById('tcModalOverlay').style.display='none'">ACEPTO LAS CONDICIONES</button>
+            <button class="btn-action save-btn" onclick="document.getElementById('tcModalOverlay').style.display='none'" style="padding:15px; margin-top:0;">ENTENDIDO</button>
         </div>
     </div>
 
-    <!-- Canvas Principal -->
     <canvas id="matrixCanvas"></canvas>
 
-    <!-- Ticker Social Superior (Movido arriba para App Look) -->
-    <div class="social-ticker">
-        <span style="color:var(--primary); font-size: 16px;" class="material-symbols-rounded">sensors</span>
-        <span class="ticker-text" id="socialTicker">Cargando actividad de la red...</span>
-    </div>
-
-    <div class="dashboard" id="mainDashboard">
+    <!-- DASHBOARD PRINCIPAL (Con Pestañas para Móvil) -->
+    <div class="dashboard">
         
-        <!-- PANEL IZQUIERDO: CARTERA (Tab 1 en Mobile) -->
-        <div class="card balance-card mobile-tab" id="tab-wallet">
-            <div class="panel-header">
-                <h2>Billetera & Retiros</h2>
-                <span class="material-symbols-rounded" style="color:var(--text-muted)">account_balance_wallet</span>
-            </div>
-            <div class="panel-content">
-                <div class="crypto-selector">
-                    <button class="crypto-btn active" onclick="changeCoin('BTC')" id="btn-BTC">BTC</button>
-                    <button class="crypto-btn" onclick="changeCoin('LTC')" id="btn-LTC">LTC</button>
-                    <button class="crypto-btn" onclick="changeCoin('DASH')" id="btn-DASH">DASH</button>
-                </div>
-                
-                <div class="balance-main">
-                    <p class="label" id="balanceLabel">Saldo Minado (BTC)</p>
-                    <div class="amount" id="cryptoBalance">0.00000000</div>
-                    <div class="usd">≈ $<span id="usdBalance">0.00</span> USD</div>
-                    <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
-                        <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Hardware Activo:</span><br>
-                        <strong id="balanceActiveMiner" style="color: var(--primary); font-size: 14px;">Básico Sim Rig</strong>
+        <!-- PESTAÑA 1: CARTERA (Izquierda Desktop) -->
+        <div class="tab-pane" id="tab-wallet">
+            <div class="card balance-card">
+                <div class="panel-header"><h2>Comandos de Cartera</h2></div>
+                <div class="panel-content">
+                    <div class="crypto-selector">
+                        <button class="crypto-btn active" onclick="changeCoin('BTC')" id="btn-BTC">BTC</button>
+                        <button class="crypto-btn" onclick="changeCoin('LTC')" id="btn-LTC">LTC</button>
+                        <button class="crypto-btn" onclick="changeCoin('DASH')" id="btn-DASH">DASH</button>
                     </div>
-                </div>
+                    
+                    <div class="balance-main">
+                        <p class="label" id="balanceLabel">Saldo Minado (BTC)</p>
+                        <div class="amount mono" id="cryptoBalance">0.00000000</div>
+                        <div class="usd">≈ $<span id="usdBalance" class="mono">0.00</span> USD</div>
+                        <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                            <span style="font-size: 10px; color: var(--text-muted); font-weight:bold;">MINERO ACTIVO:</span><br>
+                            <strong id="balanceActiveMiner" style="color: var(--primary); font-size: 14px;">Básico Sim Rig</strong>
+                        </div>
+                    </div>
 
-                <div class="progress-container">
-                    <div class="progress-header">
-                        <span>Progreso para Retiro</span>
-                        <span>$<span id="progCurrent">0.00</span> / $<span id="progTarget">10.00</span></span>
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span>Progreso de Retiro</span>
+                            <span class="mono">$<span id="progCurrent">0.00</span> / $<span id="progTarget">10.00</span></span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progFill"></div>
+                        </div>
+                        <div class="gas-fee-label" id="gasFeeDisplay">Comisión de Red (Gas Fee): 15%</div>
                     </div>
-                    <div class="progress-track">
-                        <div class="progress-fill" id="progFill"></div>
-                    </div>
-                    <div class="gas-fee-label" id="gasFeeDisplay">Comisión de Red (Gas Fee): 15%</div>
-                </div>
 
-                <div class="withdraw-config">
-                    <h3>Método de Destino</h3>
-                    <div class="input-group">
-                        <label>Red (Network)</label>
-                        <select class="payment-select" id="wdNetworkSelect"></select>
+                    <div class="withdraw-config">
+                        <h3>Método de Retiro</h3>
+                        <div class="input-group">
+                            <label>Red (Network)</label>
+                            <select class="payment-select" id="wdNetworkSelect"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Dirección de Billetera</label>
+                            <input type="text" class="wallet-input" id="wdWalletAddress" placeholder="Pega tu dirección aquí">
+                        </div>
+                        <button class="btn-action save-btn" onclick="saveWithdrawMethod()">Guardar Billetera</button>
                     </div>
-                    <div class="input-group">
-                        <label>Dirección de Billetera</label>
-                        <input type="text" class="wallet-input" id="wdWalletAddress" placeholder="Pega tu dirección aquí">
-                    </div>
-                    <button class="btn-action save-btn" onclick="saveWithdrawMethod()">
-                        <span class="material-symbols-rounded">save</span> Guardar Billetera
+
+                    <button class="btn-action withdraw" onclick="initiateWithdraw()">Solicitar Retiro</button>
+                    
+                    <!-- Botón salir móvil lo pondremos en configuraciones, pero lo dejamos aquí para desktop -->
+                    <button class="btn-logout" onclick="logoutUser()" style="margin-top: 20px;">
+                        Cerrar Sesión
                     </button>
                 </div>
-
-                <button class="btn-action withdraw" onclick="initiateWithdraw()" style="margin-bottom: 20px; background: rgba(247, 147, 26, 0.1); color: var(--primary); border-color: var(--primary);">
-                    <span class="material-symbols-rounded">payments</span> Retirar Fondos
-                </button>
-                
-                <button class="btn-logout" onclick="logoutUser()">
-                    <span class="material-symbols-rounded">logout</span> Cerrar Sesión
-                </button>
             </div>
         </div>
 
-        <!-- PANEL CENTRAL: MINERO E HISTORIAL (Tab 2 en Mobile - ACTIVE BY DEFAULT) -->
-        <div class="central-panel-grid mobile-tab active-tab" id="tab-miner">
-            <div class="card hardware-card" style="flex: none;">
+        <!-- PESTAÑA 2: MINERO (Centro Desktop - Activa por Defecto) -->
+        <div class="tab-pane active" id="tab-miner">
+            <div class="card hardware-card">
                 <div class="panel-header">
-                    <h2>Terminal H-Core</h2>
-                    <div id="activePlanDisplay" style="color:var(--text-muted); font-size: 12px; font-weight: 600;">Rig: Básico Sim</div>
+                    <h2>Estado de Rig Principal</h2>
+                    <div id="activePlanDisplay" style="color:var(--text-muted); font-size:12px; font-weight:bold;">Rig: Básico</div>
                 </div>
                 <div class="panel-content">
                    <div class="rig-visual-panel">
                         <div class="cortex-module">
                             
-                            <div id="minerActivationOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 7, 10, 0.9); z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
-                                <h3 style="color: var(--danger); margin-bottom: 10px; font-size: 18px; font-weight:900;">SISTEMA INACTIVO</h3>
-                                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 25px;">Requiere encendido manual.</p>
-                                <button class="btn-boost" style="background: linear-gradient(45deg, #10b981, #047857); font-size: 14px;" onclick="turnOnMiner()">
-                                    <span class="material-symbols-rounded">power_settings_new</span> ENCENDER RIG
+                            <div id="minerActivationOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 7, 10, 0.95); z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                <h3 style="color: var(--danger); margin-bottom: 10px; font-size: 16px;">SISTEMA INACTIVO</h3>
+                                <p style="color: var(--text-muted); font-size: 11px; margin-bottom: 20px;">Encienda los servidores H-Core.</p>
+                                <button class="btn-boost" style="background: linear-gradient(45deg, #10b981, #047857);" onclick="turnOnMiner()">
+                                    ▶ INICIAR MINERÍA
                                 </button>
                             </div>
 
@@ -699,13 +717,13 @@
                                         <div class="card-back">ACTIVO</div>
                                     </div>
                                 </div>
-                                <div id="videoErrorMsg">⚠️ Error de video</div>
+                                <div id="videoErrorMsg">⚠️ Sin video</div>
                                 <video id="minerVideo" src="" autoplay loop muted playsinline></video>
                                 <div class="video-overlay-scanline"></div>
                             </div>
 
                             <div class="h-meter-advanced">
-                                <div class="h-meter-title">Potencia (TH/s)</div>
+                                <div class="h-meter-title">H-Core Engine</div>
                                 <svg viewBox="0 0 100 50" class="gauge-svg">
                                     <defs>
                                         <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -721,139 +739,138 @@
                             </div>
 
                             <div class="hardware-core-label">
-                                <strong style="color: #fff">Rig Status</strong> <span id="coreStatusLabel">[ON]</span>
+                                <strong style="color: #fff">Quantum Rig</strong> <span id="coreStatusLabel">[ACTIVE]</span>
                             </div>
                         </div>
 
                         <button class="btn-boost" id="btnAdBoost" onclick="watchAdForBoost()">
-                            <span class="material-symbols-rounded">bolt</span> Boost Hashrate (Ad)
+                            ⚡ Sobrecargar Hashrate (Ver Anuncio)
                         </button>
                         
-                        <div style="display:flex; gap:10px; margin-bottom: 5px;">
-                            <button class="btn-boost" style="flex:1; background:linear-gradient(45deg, #f59e0b, #d97706); padding: 12px; font-size:11px; animation:none;" onclick="openRoulette()">
-                                <span class="material-symbols-rounded" style="font-size: 18px;">casino</span> Ruleta
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-boost" style="flex:1; background:linear-gradient(45deg, #f59e0b, #d97706); animation:none;" onclick="openRoulette()">
+                                🎰 Ruleta
                             </button>
-                            <button class="btn-boost" style="flex:1; background:linear-gradient(45deg, #8b5cf6, #6d28d9); padding: 12px; font-size:11px; animation:none;" onclick="openReferrals()">
-                                <span class="material-symbols-rounded" style="font-size: 18px;">group_add</span> Referidos
+                            <button class="btn-boost" style="flex:1; background:linear-gradient(45deg, #8b5cf6, #6d28d9); animation:none;" onclick="openReferrals()">
+                                👥 Afiliados
                             </button>
                         </div>
 
-                        <button class="btn-boost" id="btnMaintenance" style="width:100%; background:linear-gradient(45deg, #ef4444, #b91c1c); display:none; animation:none; margin-bottom: 5px;" onclick="repairMiner()">
-                            <span class="material-symbols-rounded">build</span> Reparar Rig ($2)
+                        <button class="btn-boost" id="btnMaintenance" style="width:100%; background:linear-gradient(45deg, #ef4444, #b91c1c); display:none; animation:none;" onclick="repairMiner()">
+                            🔧 Reparar Hardware ($2)
                         </button>
                         
                         <div class="command-ui-modules">
                             <div class="ui-stat-module">
-                                <span class="label">Poder de Hash <span id="boostBadge" style="display:none; color:var(--success);">[x2]</span></span>
-                                <strong id="hashrateDisplay">15.0 TH/s</strong>
+                                <span class="label">Tasa de Hash <span id="boostBadge" style="display:none; color:var(--success);">[BOOST x2]</span></span>
+                                <strong id="hashrateDisplay" class="mono">15.0 TH/s</strong>
                             </div>
                             <div class="ui-stat-module">
-                                <span class="label">Extracción</span>
-                                <strong id="rateDisplay" style="font-size: 13px;">0.0000000001 /s</strong>
+                                <span class="label">Rendimiento Sec.</span>
+                                <strong id="rateDisplay" class="mono">0.0000000001 /s</strong>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- HISTORIAL -->
-            <div class="history-section">
-                <div class="history-header">
-                    <span>Logs del Sistema</span>
-                    <span id="totalRecordsLabel" style="font-size: 11px;">0 Registros</span>
-                </div>
-                <div class="history-table-container">
-                    <table class="history-table">
-                        <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>Detalle</th>
-                                <th>Monto</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyTableBody">
-                        </tbody>
-                    </table>
-                </div>
-                <div class="pagination-controls">
-                    <button class="page-btn" id="btnPrevPage" onclick="changePage(-1)">Anterior</button>
-                    <span id="pageIndicator" style="font-size: 11px; color: var(--text-muted);">Pag 1</span>
-                    <button class="page-btn" id="btnNextPage" onclick="changePage(1)">Siguiente</button>
-                </div>
-            </div>
         </div>
 
-        <!-- PANEL DERECHO: TIENDA (Tab 3 en Mobile) -->
-        <div class="right-column mobile-tab" id="tab-shop">
-            
-            <div class="card calc-card" style="margin-bottom: 20px;">
-                <div class="panel-header">
-                    <h2>Simulador de ROI</h2>
-                    <span class="material-symbols-rounded" style="color:var(--primary)">calculate</span>
-                </div>
-                <div class="panel-content" style="padding: 20px;">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <span style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Equipo Seleccionado:</span><br>
+        <!-- PESTAÑA 3: TIENDA DE MINEROS (Derecha Desktop) -->
+        <div class="tab-pane" id="tab-store">
+            <div class="card calc-card">
+                <div class="panel-header"><h2>Simulador Comercial</h2></div>
+                <div class="panel-content" style="padding: 15px;">
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <span style="font-size:11px; color:var(--text-muted); font-weight:bold;">EVALUANDO:</span><br>
                         <strong id="calcMinerName" style="color:var(--primary); font-size:16px;">Básico Sim Rig</strong>
                     </div>
-                    
-                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:10px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <span style="color:var(--text-muted); font-weight: 600;">Costo:</span>
-                        <strong id="calcCost" style="color:white; font-family: monospace;">$0.00</strong>
+                    <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; margin-top:5px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span style="color:var(--text-muted)">Costo Inversión:</span>
+                        <strong id="calcCost" style="color:white">$0.00</strong>
                     </div>
-                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <span style="color:var(--text-muted); font-weight: 600;">Diario:</span>
-                        <strong id="calcEarnDaily" style="color:var(--warning); font-family: monospace;">$0.00</strong>
+                    <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; margin-top:10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span style="color:var(--text-muted)">Ganancia Diaria:</span>
+                        <strong id="calcEarnDaily" style="color:var(--warning)">$0.00</strong>
                     </div>
-                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <span style="color:var(--text-muted); font-weight: 600;">Mensual (30d):</span>
-                        <strong id="calcEarn30" style="color:var(--success); font-family: monospace;">$0.00</strong>
+                    <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; margin-top:10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span style="color:var(--text-muted)">Ganancia Mensual:</span>
+                        <strong id="calcEarn30" style="color:var(--success)">$0.00</strong>
                     </div>
-                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:12px;">
-                        <span style="color:var(--text-muted); font-weight: 600;">Recuperación:</span>
+                    <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; margin-top:10px;">
+                        <span style="color:var(--text-muted)">Retorno (ROI):</span>
                         <strong id="calcRoi" style="color:var(--danger)">Infinito</strong>
                     </div>
                 </div>
             </div>
 
             <div class="card tiers-card">
-                <div class="panel-header">
-                    <h2>Upgrades de Hardware</h2>
-                    <span class="material-symbols-rounded" style="color:var(--text-muted)">memory</span>
-                </div>
+                <div class="panel-header"><h2>Upgrades de Hardware</h2></div>
                 <div class="panel-content tiers-list" id="tiersContainer">
-                    <!-- Los planes se renderizan aquí mediante JS -->
+                    <!-- Los planes se renderizan aquí por JS -->
                 </div>
             </div>
         </div>
+
+        <!-- PESTAÑA 4: HISTORIAL (Solo se separa en móvil, en desktop sale abajo) -->
+        <div class="tab-pane" id="tab-history">
+            <div class="card history-section" style="height: 100%;">
+                <div class="history-header">
+                    <span>Registro Transaccional</span>
+                    <span id="totalRecordsLabel" style="font-size: 11px;">0 Registros</span>
+                </div>
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Estado</th>
+                                <th>Detalle</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- JS inyecta filas aquí -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination-controls">
+                    <button class="page-btn" id="btnPrevPage" onclick="changePage(-1)">Anterior</button>
+                    <span id="pageIndicator" class="mono">1 / 1</span>
+                    <button class="page-btn" id="btnNextPage" onclick="changePage(1)">Siguiente</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- NUEVO: BARRA DE NAVEGACIÓN INFERIOR (MATERIAL 3) SOLO VISIBLE EN MÓVILES -->
-    <nav class="bottom-nav">
-        <div class="bottom-nav-inner">
-            <a class="nav-item" id="btn-nav-wallet" onclick="switchTab('wallet')">
-                <span class="material-symbols-rounded">account_balance_wallet</span>
-                <span>Cartera</span>
-            </a>
-            <a class="nav-item active" id="btn-nav-miner" onclick="switchTab('miner')">
-                <span class="material-symbols-rounded">memory</span>
-                <span>Minero</span>
-            </a>
-            <a class="nav-item" id="btn-nav-shop" onclick="switchTab('shop')">
-                <span class="material-symbols-rounded">storefront</span>
-                <span>Tienda</span>
-            </a>
-        </div>
+    <!-- NAVEGACIÓN INFERIOR PARA TELÉFONOS (NATIVE APP FEEL) -->
+    <nav class="mobile-bottom-nav">
+        <button class="nav-btn" id="nav-tab-wallet" onclick="switchTab('tab-wallet')">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+            Cartera
+        </button>
+        <button class="nav-btn active" id="nav-tab-miner" onclick="switchTab('tab-miner')">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            Minero
+        </button>
+        <button class="nav-btn" id="nav-tab-store" onclick="switchTab('tab-store')">
+            <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            Tienda
+        </button>
+        <button class="nav-btn" id="nav-tab-history" onclick="switchTab('tab-history')">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Historial
+        </button>
     </nav>
 
-    <!-- MODALES VARIOS -->
+    <!-- MODAL GENERAL DE PAGOS -->
     <div class="modal-overlay" id="paymentOverlay">
         <div class="payment-modal">
+            
             <div id="paymentInputArea">
                 <h3 id="modalPlanName">Desbloquear Plan</h3>
-                <div class="cost-display">Monto: $<span id="modalPlanCost">0</span> USD</div>
+                <div class="cost-display mono">Monto: $<span id="modalPlanCost">0</span> USD</div>
                 <div class="input-group">
-                    <label>Red de Pago</label>
+                    <label>Seleccionar Red de Pago</label>
                     <select class="payment-select" id="cryptoNetworkSelect" onchange="updateWalletAddressModal()">
                         <option value="USDT">USDT (TRC 20)</option>
                         <option value="BTC">Bitcoin (BTC)</option>
@@ -861,30 +878,30 @@
                     </select>
                 </div>
                 <div class="input-group">
-                    <label>Billetera de Envío</label>
-                    <input type="text" class="wallet-input" id="walletAddressDisplayModal" readonly value="">
+                    <label>Dirección de Envío (Copiar)</label>
+                    <input type="text" class="wallet-input" id="walletAddressDisplayModal" readonly value="TNCFjTLYp63k2ocAooAnTUJbodaWLrRQhh">
                 </div>
                 <div class="modal-btns">
-                    <button class="btn-cancel" onclick="closeModal()">Atrás</button>
-                    <button class="btn-confirm" id="btnVerifyPayment" onclick="processPayment()">Pagar</button>
+                    <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                    <button class="btn-confirm" id="btnVerifyPayment" onclick="processPayment()">Verificar Pago</button>
                 </div>
             </div>
 
             <div id="tfaArea" style="display:none;" class="tfa-modal">
                 <h3 style="color:var(--danger)">Seguridad 2FA</h3>
-                <p style="font-size:13px; color:var(--text-muted); margin-top:10px;">Ingrese su código de Google Authenticator.</p>
-                <input type="number" id="tfaCode" class="tfa-input" placeholder="000000">
+                <p style="font-size:12px; color:var(--text-muted);">Ingrese el código de 6 dígitos de su App Authenticator.</p>
+                <input type="number" id="tfaCode" class="tfa-input" maxlength="6" placeholder="000000">
                 <div class="modal-btns">
-                    <button class="btn-cancel" onclick="closeModal()">Atrás</button>
+                    <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
                     <button class="btn-confirm" onclick="verify2FA()">Retirar</button>
                 </div>
             </div>
 
             <div id="adArea" style="display:none; text-align:center;">
-                <h3 style="color:var(--primary)">Potenciando Hardware</h3>
-                <p style="font-size:13px; color:var(--text-muted); margin:15px 0;">Visualizando anuncio. Por favor espere...</p>
+                <h3 style="color:var(--primary)">Potenciando...</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Viendo conexión publicitaria cifrada. Espere.</p>
                 <div class="payment-spinner" style="border-left-color: var(--primary);"></div>
-                <p id="adTimerText" style="font-size:28px; font-family: monospace; color:#fff;">15</p>
+                <p id="adTimerText" class="mono" style="font-size:30px; font-weight:bold; color:#fff;">15</p>
             </div>
 
             <div id="paymentStatusArea">
@@ -895,82 +912,23 @@
         </div>
     </div>
 
-    <!-- Modal Referidos -->
-    <div class="modal-overlay" id="referralModal">
-        <div class="payment-modal" style="width: 500px;">
-            <h3 style="color:var(--primary); text-align:center;">Red de Afiliados</h3>
-            <p style="font-size:12px; color:var(--text-muted); text-align:center; margin-bottom:20px;">Gane comisiones en 3 niveles de profundidad.</p>
-            
-            <div class="ref-card">
-                <span style="font-size:11px; font-weight:800; color:var(--text-muted);">Tu Enlace (ID: <strong id="refUserIdDisplay" style="color:white;">---</strong>)</span>
-                <div class="ref-link-box">
-                    <input type="text" id="refLinkInput" class="ref-input" readonly>
-                    <button class="ref-btn" onclick="copyRefLink()">Copiar</button>
-                </div>
-            </div>
-
-            <div class="ref-levels">
-                <div class="ref-level-box">
-                    <span>Nivel 1 (10%)</span>
-                    <strong id="refCount1">0</strong>
-                    <span class="ref-earn" id="refEarn1">+$0.00</span>
-                </div>
-                <div class="ref-level-box">
-                    <span>Nivel 2 (5%)</span>
-                    <strong id="refCount2">0</strong>
-                    <span class="ref-earn" id="refEarn2">+$0.00</span>
-                </div>
-                <div class="ref-level-box">
-                    <span>Nivel 3 (2%)</span>
-                    <strong id="refCount3">0</strong>
-                    <span class="ref-earn" id="refEarn3">+$0.00</span>
-                </div>
-            </div>
-
-            <div style="margin-top: 25px; text-align: center;">
-                <span style="font-size:11px; font-weight:800; color:var(--text-muted);">Ganancia Total de Afiliados</span><br>
-                <strong style="color:var(--success); font-size:28px; font-family:monospace;" id="refTotalEarn">$0.00</strong>
-            </div>
-
-            <button class="btn-cancel" onclick="document.getElementById('referralModal').style.display='none'" style="width:100%; margin-top:25px;">Cerrar</button>
-        </div>
-    </div>
-
-    <!-- Modal Ruleta -->
-    <div class="modal-overlay" id="rouletteModal">
-        <div class="payment-modal" style="text-align: center; width: 350px;">
-            <h3 style="color:var(--primary);">Giro Diario</h3>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:25px;">Premios directo a tu balance.</p>
-            
-            <div class="roulette-container">
-                <div class="roulette-marker"></div>
-                <div class="roulette-wheel" id="rouletteWheel">
-                    <span class="r-label l-win">+0.05 TH/s</span>
-                    <span class="r-label l-lose1">Vacío</span>
-                    <span class="r-label l-big1">$500</span>
-                    <span class="r-label l-mid">$50</span>
-                    <span class="r-label l-big2">$1000</span>
-                    <span class="r-label l-lose2">Vacío</span>
-                </div>
-                <div class="roulette-center">🎰</div>
-            </div>
-
-            <button class="btn-boost" id="btnSpin" onclick="spinRoulette()" style="width:100%; background:var(--success); color:#000;">TIRAR RULETA</button>
-            <button class="btn-cancel" onclick="document.getElementById('rouletteModal').style.display='none'" style="width:100%; margin-top:15px;">Cerrar</button>
-        </div>
-    </div>
-
-    <div class="maintenance-overlay" id="maintenanceOverlay">
-        <div class="maintenance-spinner"></div>
-        <h1>MANTENIMIENTO</h1>
-        <p>Sistema en actualización. Tus mineros siguen trabajando al 100%.</p>
-    </div>
-
-    <div id="moneyRainContainer"></div>
-    <div id="toast-container"></div>
-    <div id="fomo-container"></div>
-
+    <!-- LÓGICA DE JAVASCRIPT INTEGRADA -->
     <script>
+        // LÓGICA DE PESTAÑAS (BOTTOM NAV)
+        function switchTab(tabId) {
+            if(window.innerWidth > 1000) return; // En PC no hace falta cambiar pestañas
+            
+            document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+            const targetTab = document.getElementById(tabId);
+            if(targetTab) targetTab.classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const targetBtn = document.getElementById('nav-' + tabId);
+            if(targetBtn) targetBtn.classList.add('active');
+            
+            window.scrollTo(0,0);
+        }
+
         // ==========================================
         // CONFIGURACIÓN DE FIREBASE
         // ==========================================
@@ -990,104 +948,113 @@
             isFirebaseActive = true;
             console.log("Firebase Conectado.");
         } catch(e) {
-            console.warn("Error conectando Firebase.");
+            console.warn("Firebase no configurado. Operando Local.");
         }
 
+        // ==========================================
+        // ESTADO GLOBAL Y CONFIGURACIONES
+        // ==========================================
         let user = null;
         let selectedTierForPayment = null;
         let currentHistoryPage = 1;
-        const itemsPerPage = 6; /* Reducido para mejor vista en móvil */
+        const itemsPerPage = 7;
         let withdrawAmountTemp = 0;
 
+        // PRECIOS REALES (Afectan la conversión inversa de la minería)
         const cryptoData = { 
-            'BTC': { price: 69150, symbol: 'BTC', multiplier: 1, wdMultiplier: 1 }, 
-            'LTC': { price: 85.50, symbol: 'LTC', multiplier: 800, wdMultiplier: 4 }, 
-            'DASH': { price: 32.10, symbol: 'DASH', multiplier: 2150, wdMultiplier: 8 } 
+            'BTC': { price: 69150, symbol: 'BTC' }, 
+            'LTC': { price: 85.50, symbol: 'LTC' }, 
+            'DASH': { price: 32.10, symbol: 'DASH' } 
         };
-        const paymentWallets = { 'USDT': 'TNCFjTLYp63k2ocAooAnTUJbodaWLrRQhh', 'BTC': '1GXrmr4teSrfGTp294YjG11Zk6q7zDLrtv', 'ETH': '0x02a8f8567e2a3ed68b51de71d25f23a27bb7cb7f' };
+        
+        const paymentWallets = { 
+            'USDT': 'TNCFjTLYp63k2ocAooAnTUJbodaWLrRQhh', 
+            'BTC': '1GXrmr4teSrfGTp294YjG11Zk6q7zDLrtv', 
+            'ETH': '0x02a8f8567e2a3ed68b51de71d25f23a27bb7cb7f' 
+        };
 
-        function getMinWithdrawUSD(tierId, coinSymbol) {
+        function getMinWithdrawUSD(tierId) {
             const t = tiers.find(x => x.id === tierId) || tiers[0];
-            const multiplier = cryptoData[coinSymbol] ? cryptoData[coinSymbol].wdMultiplier : 1;
-            return t.minWithdrawUSD * multiplier;
+            return t.minWithdrawUSD; // Constante en USD sin importar la moneda
         }
 
         const tiers = [
-            { id: 1, name: "Básico Sim Rig", hashrate: "15.0 TH/s", baseBtcPerSec: 0.000000000008, costUSD: 0, minWithdrawUSD: 10, needleRange: [0, 40], playbackSpeed: 1, gasFee: 0.15, specs: "Minado gratuito. Retiro a largo plazo." },
-            { id: 2, name: "ProMiner X", hashrate: "90.0 TH/s", baseBtcPerSec: 0.000000000083, costUSD: 10, minWithdrawUSD: 25, needleRange: [45, 80], videoSrc: "planprominerX.mp4", playbackSpeed: 1.5, gasFee: 0.10, specs: "ROI: 20 días | X2 en 30 días" },
-            { id: 3, name: "AntCluster 1200", hashrate: "280 TH/s", baseBtcPerSec: 0.000000000167, costUSD: 20, minWithdrawUSD: 50, needleRange: [85, 130], videoSrc: "planantcluster.mp4", playbackSpeed: 2.5, gasFee: 0.05, specs: "ROI: 20 días | Alta eficiencia" },
-            { id: 4, name: "Quantum H-Core", hashrate: "1500 TH/s", baseBtcPerSec: 0.000000000293, costUSD: 35, minWithdrawUSD: 87.5, needleRange: [135, 180], videoSrc: "plancuantun.mp4", playbackSpeed: 4.0, gasFee: 0.00, specs: "ROI: 20 días | 0% Gas Fee" }
+            { id: 1, name: "Básico Sim Rig", hashrate: "15.0 TH/s", baseBtcPerSec: 0.000000000008, costUSD: 0, minWithdrawUSD: 10, needleRange: [0, 40], playbackSpeed: 1, gasFee: 0.15, specs: "Minado constante y seguro." },
+            { id: 2, name: "ProMiner X", hashrate: "90.0 TH/s", baseBtcPerSec: 0.000000000083, costUSD: 10, minWithdrawUSD: 25, needleRange: [45, 80], videoSrc: "planprominerX.mp4", playbackSpeed: 1.5, gasFee: 0.10, specs: "ROI: 20 días | Eficiencia Alta" },
+            { id: 3, name: "AntCluster 1200", hashrate: "280 TH/s", baseBtcPerSec: 0.000000000167, costUSD: 20, minWithdrawUSD: 50, needleRange: [85, 130], videoSrc: "planantcluster.mp4", playbackSpeed: 2.5, gasFee: 0.05, specs: "ROI: 20 días | Consumo Optimizado" },
+            { id: 4, name: "Quantum H-Core", hashrate: "1500 TH/s", baseBtcPerSec: 0.000000000293, costUSD: 35, minWithdrawUSD: 87.5, needleRange: [135, 180], videoSrc: "plancuantun.mp4", playbackSpeed: 4.0, gasFee: 0.00, specs: "ROI: 20 días | Fuerza Bruta (0% Fee)" }
         ];
 
         function showToast(message) { 
             const c = document.getElementById('toast-container'); 
             const t = document.createElement('div'); 
             t.className = 'toast'; 
-            // Añadir un ícono de info si es mensaje genérico
-            t.innerHTML = `<span class="material-symbols-rounded" style="color:var(--primary)">info</span> <div>${message}</div>`; 
+            t.innerHTML = message; 
             c.appendChild(t); 
-            setTimeout(() => t.remove(), 4000); 
+            setTimeout(() => t.remove(), 3500); 
         }
 
-        // --- SISTEMA DE PESTAÑAS MÓVILES (NUEVO) ---
-        function switchTab(tabId) {
-            if(window.innerWidth > 1000) return; // En PC no hace nada
-            // Limpiar todas las clases active
-            document.querySelectorAll('.mobile-tab').forEach(tab => tab.classList.remove('active-tab'));
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            // Activar la seleccionada
-            document.getElementById('tab-' + tabId).classList.add('active-tab');
-            document.getElementById('btn-nav-' + tabId).classList.add('active');
-        }
-
+        // ==========================================
+        // INICIALIZACIÓN
+        // ==========================================
         function initApp() {
             updateWithdrawNetworks();
+            
             if(user && user.savedWallet) {
                 const wdSelect = document.getElementById('wdNetworkSelect');
-                if([...wdSelect.options].some(opt => opt.value === user.savedWallet.network)) { wdSelect.value = user.savedWallet.network; }
+                if([...wdSelect.options].some(opt => opt.value === user.savedWallet.network)) {
+                    wdSelect.value = user.savedWallet.network;
+                }
                 document.getElementById('wdWalletAddress').value = user.savedWallet.address;
             }
+            
             if(user) {
                 changeCoin(user.activeCoin || 'BTC'); 
                 activateTier(user.tierId || 1); 
                 startMiningLoop();
-                renderHistory();
+                if(typeof renderHistory === 'function') renderHistory();
             }
             startFomoSystem();
 
             if (isFirebaseActive && firebase.auth().currentUser) {
                 const uid = firebase.auth().currentUser.uid;
+                
                 firebase.database().ref('settings/maintenance').on('value', snap => {
                     const isOffline = snap.val();
                     const overlay = document.getElementById('maintenanceOverlay');
                     if(overlay) overlay.style.display = isOffline ? 'flex' : 'none';
                 });
+
                 firebase.database().ref('users/' + uid).on('value', snap => {
                     if(!snap.exists()) {
                         firebase.auth().signOut().then(() => {
-                            alert("Su cuenta ha sido eliminada.");
+                            alert("Su cuenta ha sido eliminada por el administrador.");
                             window.location.reload();
                         });
                     } else {
                         const dbUser = snap.val();
+                        
                         if(user.pendingTiers && user.pendingTiers.length > 0) {
                             if(dbUser.unlockedTiers) {
                                 user.pendingTiers.forEach(pendingTierId => {
                                     if(dbUser.unlockedTiers.includes(pendingTierId)) {
-                                        showToast(`🎉 <b>¡Minero Aprobado!</b>`);
+                                        showToast(`🎉 <b>¡Minero Aprobado!</b><br>Su equipo se ha activado.`);
                                         user.pendingTiers = user.pendingTiers.filter(id => id !== pendingTierId); 
                                         activateTier(pendingTierId);
                                     }
                                 });
                             }
                         }
+
                         if(dbUser.adminBonus !== undefined && dbUser.adminBonus !== null) {
                             user.balances[user.activeCoin] += dbUser.adminBonus;
                             if(user.balances[user.activeCoin] < 0) user.balances[user.activeCoin] = 0; 
+                            
                             const esSuma = dbUser.adminBonus > 0;
-                            showToast(esSuma ? `💰 <b>Bono Acreditado</b>` : `⚠️ <b>Ajuste de Saldo</b>`);
+                            showToast(esSuma ? `💰 <b>Bono Acreditado</b><br>Se inyectó saldo a tu cuenta.` : `⚠️ <b>Ajuste de Saldo</b><br>Se aplicó una deducción.`);
                             firebase.database().ref('users/' + uid + '/adminBonus').remove();
                         }
+
                         user.unlockedTiers = dbUser.unlockedTiers || [1];
                         user.tierId = dbUser.tierId || 1;
                         renderTiers();
@@ -1100,6 +1067,7 @@
             const container = document.getElementById('tiersContainer');
             if(!container) return;
             container.innerHTML = '';
+            
             if (!user || !user.unlockedTiers) return;
             if(!user.pendingTiers) user.pendingTiers = [];
 
@@ -1111,25 +1079,36 @@
                 const card = document.createElement('div');
                 card.className = `tier-card ${isCurrent ? 'active' : ''} ${(!isUnlocked && !isCurrent && !isPending) ? 'locked' : ''}`;
                 
-                if(!isCurrent && !isPending) { card.onclick = () => isUnlocked ? activateTier(tier.id) : openPaymentModal(tier.id); }
+                if(!isCurrent && !isPending) { 
+                    card.onclick = () => isUnlocked ? activateTier(tier.id) : openPaymentModal(tier.id); 
+                }
 
-                const currentMinWd = getMinWithdrawUSD(tier.id, user ? user.activeCoin : 'BTC');
-                let pendingOverlayHtml = isPending ? `<div class="tier-processing-overlay"><div class="payment-spinner"></div><p>Procesando</p></div>` : '';
+                const currentMinWd = getMinWithdrawUSD(tier.id);
+                
+                let pendingOverlayHtml = '';
+                if(isPending) {
+                    pendingOverlayHtml = `
+                        <div class="tier-processing-overlay">
+                            <div class="payment-spinner"></div>
+                            <p>Procesando...</p>
+                        </div>
+                    `;
+                }
 
                 card.innerHTML = `
                     ${pendingOverlayHtml}
                     <h3>${tier.name}</h3>
-                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:15px; display: flex; justify-content: space-between;">
-                        <span>Mínimo: <b style="color:white;">$${currentMinWd.toFixed(2)}</b></span>
-                        <span style="color:var(--danger); font-weight:800;">Fee: ${(tier.gasFee * 100)}%</span>
+                    <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px; display: flex; justify-content: space-between; font-weight:bold;">
+                        <span>Retiro Mín: <b style="color:white;">$${currentMinWd.toFixed(2)}</b></span>
+                        <span style="color:var(--danger);">Fee: ${(tier.gasFee * 100)}%</span>
                     </div>
-                    <div class="tier-stats" style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.02); margin-bottom: 15px;">
-                        <p style="font-size:13px; color:var(--text-main); margin-bottom: 5px;">Potencia: <strong style="color:var(--primary); font-family: monospace; font-size: 15px;">${tier.hashrate}</strong></p>
-                        <p style="font-size:11px; color:#3b82f6;">${tier.specs}</p>
+                    <div style="background: #0d0f14; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.02); margin-bottom: 10px;">
+                        <p style="font-size:12px; margin-bottom: 6px; font-weight:bold;">Poder: <strong style="color:var(--primary);">${tier.hashrate}</strong></p>
+                        <p style="font-size:10px; color:#3b82f6; font-style: italic;">${tier.specs}</p>
                     </div>
                     <div class="tier-cost-line">
-                        $${tier.costUSD.toLocaleString()} USD
-                        ${!isCurrent && !isPending ? '<button class="tier-cost-btn">Adquirir</button>' : ''}
+                        $${tier.costUSD.toLocaleString()}
+                        ${!isCurrent && !isPending ? '<button class="tier-cost-btn">Comprar</button>' : ''}
                     </div>
                 `;
                 container.appendChild(card);
@@ -1141,16 +1120,15 @@
             user.tierId = tierId;
             const newTier = tiers.find(t => t.id === tierId);
             if(!newTier) return;
+
             document.body.setAttribute('data-tier', tierId);
             
             const minerVideo = document.getElementById('minerVideo');
             const basicCard = document.getElementById('basicPlanCard');
-            const videoMsg = document.getElementById('videoErrorMsg');
 
             if(minerVideo && basicCard) {
                 if (tierId === 1) {
                     minerVideo.style.display = 'none'; 
-                    if(videoMsg) videoMsg.style.display = 'none'; 
                     basicCard.style.display = 'block';
                 } else {
                     basicCard.style.display = 'none';
@@ -1158,28 +1136,38 @@
                     if (minerVideo.getAttribute('src') !== newTier.videoSrc) {
                         minerVideo.setAttribute('src', newTier.videoSrc); 
                         minerVideo.load();
-                        minerVideo.play().then(() => { minerVideo.playbackRate = newTier.playbackSpeed; }).catch(e => console.log("Auto-play prevenido."));
-                    } else { minerVideo.playbackRate = newTier.playbackSpeed; }
+                        minerVideo.play().then(() => { minerVideo.playbackRate = newTier.playbackSpeed; }).catch(e => console.log("Auto-play blocked"));
+                    } else { 
+                        minerVideo.playbackRate = newTier.playbackSpeed; 
+                    }
                 }
             }
             
             const hashDisplay = document.getElementById('hashrateDisplay');
-            const rateDisplay = document.getElementById('rateDisplay');
             const activePlan = document.getElementById('activePlanDisplay');
             const gasFeeDisp = document.getElementById('gasFeeDisplay');
 
             if(hashDisplay) hashDisplay.innerText = newTier.hashrate;
-            if(rateDisplay && user.activeCoin && cryptoData[user.activeCoin]) rateDisplay.innerText = `${(newTier.baseBtcPerSec * cryptoData[user.activeCoin].multiplier).toFixed(10)} ${user.activeCoin}/s`;
             if(activePlan) activePlan.innerHTML = `Rig: <span style="color:var(--primary)">${newTier.name}</span>`;
             if(gasFeeDisp) gasFeeDisp.innerText = `Comisión (Gas Fee): ${(newTier.gasFee * 100)}%`;
+            
             renderTiers(); 
+            updateCalculator();
         }
 
         function logoutUser() {
-            if(isFirebaseActive) { firebase.auth().signOut().then(() => window.location.reload()); } else { window.location.reload(); }
+            if(isFirebaseActive) {
+                firebase.auth().signOut().then(() => { window.location.reload(); });
+            } else {
+                window.location.reload();
+            }
         }
 
+        // ==========================================
+        // LOGIN Y FIREBASE
+        // ==========================================
         let isLoginMode = true;
+
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
             const btn = document.getElementById('authActionButton');
@@ -1191,6 +1179,7 @@
             const tcContainer = document.getElementById('tcContainer');
             
             errorMsg.style.display = "none";
+            
             if(isLoginMode) {
                 title.innerText = "WIN-MINER-PRO";
                 btn.innerText = "Iniciar Sesión";
@@ -1199,9 +1188,9 @@
                 regFields.forEach(f => f.style.display = 'none');
                 if(tcContainer) tcContainer.style.display = 'none';
             } else {
-                title.innerText = "Crear Cuenta";
+                title.innerText = "Registro";
                 btn.innerText = "Registrarse";
-                if(promptTxt) promptTxt.innerText = "¿Ya posees una cuenta?";
+                if(promptTxt) promptTxt.innerText = "¿Ya posees cuenta?";
                 if(switchBtn) switchBtn.innerText = "Iniciar Sesión";
                 regFields.forEach(f => f.style.display = 'block');
                 if(tcContainer) tcContainer.style.display = 'flex';
@@ -1211,22 +1200,27 @@
         function loginUser() {
             const email = document.getElementById('authEmail').value;
             const pass = document.getElementById('authPassword').value;
+            
             const name = document.getElementById('authName') ? document.getElementById('authName').value : "";
             const lastName = document.getElementById('authLastName') ? document.getElementById('authLastName').value : "";
             const dni = document.getElementById('authDni') ? document.getElementById('authDni').value : "";
             const phone = document.getElementById('authPhone') ? document.getElementById('authPhone').value : "";
             const tcCheckbox = document.getElementById('tcCheckbox');
+            
             const errorMsg = document.getElementById('authErrorMsg');
             
             errorMsg.style.display = "none";
 
             if(!isLoginMode && tcCheckbox && !tcCheckbox.checked) {
-                errorMsg.innerText = "Acepte los Términos y Condiciones.";
-                errorMsg.style.display = "block"; return;
+                errorMsg.innerText = "Debe aceptar los Términos y Condiciones.";
+                errorMsg.style.display = "block";
+                return;
             }
-            if(email.length < 5 || pass.length < 6 || (!isLoginMode && (name.length < 2 || lastName.length < 2 || dni.length < 5 || phone.length < 6))) {
-                errorMsg.innerText = "Llene todos los campos de forma correcta.";
-                errorMsg.style.display = "block"; return;
+            
+            if(email.length < 5 || pass.length < 6 || (!isLoginMode && (name.length < 2 || dni.length < 5))) {
+                errorMsg.innerText = "Complete todos los campos correctamente.";
+                errorMsg.style.display = "block";
+                return;
             }
 
             document.querySelectorAll('.auth-input').forEach(el => el.style.display = 'none');
@@ -1235,34 +1229,20 @@
             if(document.getElementById('tcContainer')) document.getElementById('tcContainer').style.display = 'none';
             
             document.getElementById('verificationBlock').style.display = 'flex';
-            document.getElementById('verifStatusTitle').innerText = "AUTENTICANDO...";
-            document.getElementById('verifStatusDesc').innerText = "Conectando al servidor root.";
 
             if(isFirebaseActive) {
                 if(isLoginMode) {
                     firebase.auth().signInWithEmailAndPassword(email, pass)
                         .then((userCredential) => { loadUserData(userCredential.user.uid, email); })
-                        .catch((error) => { 
-                            document.querySelectorAll('.auth-input').forEach(el => { if (isLoginMode && el.classList.contains('register-only')) return; el.style.display = 'block'; });
-                            document.getElementById('authActionButton').style.display = 'block';
-                            document.querySelector('.auth-switch').style.display = 'flex';
-                            document.getElementById('verificationBlock').style.display = 'none';
-                            errorMsg.innerText = error.message; errorMsg.style.display = "block"; 
-                        });
+                        .catch((error) => { restoreAuthUI(error.message); });
                 } else {
                     firebase.auth().createUserWithEmailAndPassword(email, pass)
                         .then((userCredential) => { 
-                            const newId = `ID-${Math.floor(Math.random() * 900000) + 100000}`;
+                            const userIdNum = Math.floor(Math.random() * 900000) + 100000;
+                            const newId = `ID-${userIdNum}`;
                             loadUserData(userCredential.user.uid, email, name, lastName, newId, dni, phone); 
                         })
-                        .catch((error) => { 
-                            document.querySelectorAll('.auth-input').forEach(el => el.style.display = 'block');
-                            document.getElementById('authActionButton').style.display = 'block';
-                            document.querySelector('.auth-switch').style.display = 'flex';
-                            document.getElementById('tcContainer').style.display = 'flex';
-                            document.getElementById('verificationBlock').style.display = 'none';
-                            errorMsg.innerText = error.message; errorMsg.style.display = "block"; 
-                        });
+                        .catch((error) => { restoreAuthUI(error.message); });
                 }
             } else {
                 document.getElementById('authOverlay').style.display = "none";
@@ -1270,8 +1250,22 @@
             }
         }
 
-        function loadUserData(uid, email, name = "", lastName = "", newId = null, dni = "", phone = "") {
+        function restoreAuthUI(msg) {
+            document.querySelectorAll('.auth-input').forEach(el => {
+                if (isLoginMode && el.classList.contains('register-only')) return;
+                el.style.display = 'block';
+            });
+            document.getElementById('authActionButton').style.display = 'block';
+            document.querySelector('.auth-switch').style.display = 'flex';
+            if(!isLoginMode) document.getElementById('tcContainer').style.display = 'flex';
+            document.getElementById('verificationBlock').style.display = 'none';
+            
             const errorMsg = document.getElementById('authErrorMsg');
+            errorMsg.innerText = msg; 
+            errorMsg.style.display = "block"; 
+        }
+
+        function loadUserData(uid, email, name = "", lastName = "", newId = null, dni = "", phone = "") {
             firebase.database().ref('users/' + uid).once('value').then((snapshot) => {
                 if(snapshot.exists()) {
                     user = snapshot.val();
@@ -1285,311 +1279,560 @@
                     if(user.referrals === undefined) user.referrals = { lvl1: 0, lvl2: 0, lvl3: 0, earn1: 0, earn2: 0, earn3: 0 };
                 } else {
                     user = {
-                        email: email, nombre: name, apellido: lastName, dni: dni, telefono: phone, idUsuario: newId,
-                        status: 'pending', balances: { BTC: 0, LTC: 0, DASH: 0 }, tierId: 1, unlockedTiers: [1], activeCoin: 'BTC',
-                        systemHistory: [], savedWallet: null, boostUntil: 0, minerCondition: 100, bonusHashrate: 0, lastSpinDate: 0,
+                        email: email, nombre: name, apellido: lastName, dni: dni, telefono: phone,
+                        idUsuario: newId, status: 'pending', balances: { BTC: 0, LTC: 0, DASH: 0 },
+                        tierId: 1, unlockedTiers: [1], activeCoin: 'BTC', systemHistory: [], savedWallet: null,
+                        boostUntil: 0, minerCondition: 100, bonusHashrate: 0, lastSpinDate: 0,
                         referrals: { lvl1: 0, lvl2: 0, lvl3: 0, earn1: 0, earn2: 0, earn3: 0 }
                     };
                     firebase.database().ref('users/' + uid).set(user);
                 }
                 
                 if(user.status === 'pending') {
-                    document.getElementById('authTitle').style.display = 'none';
-                    document.getElementById('authSubtitle').style.display = 'none';
-                    document.querySelectorAll('.auth-input').forEach(f => f.style.display = 'none');
-                    document.getElementById('authActionButton').style.display = 'none';
-                    document.querySelector('.auth-switch').style.display = 'none';
-                    const tcCont = document.getElementById('tcContainer'); if(tcCont) tcCont.style.display = 'none';
-                    document.getElementById('verificationBlock').style.display = 'flex';
                     const vTitle = document.getElementById('verifStatusTitle');
                     const vDesc = document.getElementById('verifStatusDesc');
-                    vTitle.innerText = "EN REVISIÓN KYC";
-                    vDesc.innerHTML = "El Admin está verificando su cuenta.<br><br>No cierre esta ventana.";
+                    vTitle.innerText = "ESPERANDO APROBACIÓN ROOT";
+                    vDesc.innerHTML = "Seguridad activada. Espere validación.";
                     
                     firebase.database().ref('users/' + uid + '/status').on('value', (statusSnap) => {
                         const currentStatus = statusSnap.val();
                         if(currentStatus === 'approved') {
                             user.status = 'approved';
-                            vTitle.innerText = "CONCEDIDO"; vDesc.innerText = "Iniciando panel...";
+                            vTitle.innerText = "ACCESO CONCEDIDO";
                             firebase.database().ref('users/' + uid + '/status').off();
-                            setTimeout(() => { document.getElementById('authOverlay').style.display = "none"; initApp(); }, 1500);
+                            setTimeout(() => {
+                                document.getElementById('authOverlay').style.display = "none";
+                                initApp();
+                            }, 1500);
                         } else if(currentStatus === 'rejected') {
-                            vTitle.innerText = "DENEGADO"; vTitle.style.color = "var(--danger)"; vTitle.style.textShadow = "0 0 15px rgba(239, 68, 68, 0.6)";
-                            vDesc.innerHTML = "Cuenta rechazada por fraude de identidad.";
-                            document.getElementById('tsRing1').style.animation = 'none'; document.getElementById('tsRing1').style.borderColor = 'transparent transparent var(--danger) var(--danger)';
-                            document.getElementById('tsRing2').style.animation = 'none'; document.getElementById('tsCore').style.background = 'var(--danger)';
-                            document.getElementById('tsCore').style.boxShadow = '0 0 30px var(--danger)'; document.getElementById('tsCore').innerText = '✖';
-                        } else if(currentStatus === null) {
-                            vTitle.innerText = "ELIMINADA"; vTitle.style.color = "var(--danger)";
-                            vDesc.innerHTML = "Registro borrado de la base de datos.";
-                            document.getElementById('tsRing1').style.animation = 'none'; document.getElementById('tsRing2').style.animation = 'none';
-                            document.getElementById('tsCore').style.background = '#333'; document.getElementById('tsCore').style.boxShadow = 'none';
+                            vTitle.innerText = "ACCESO DENEGADO";
+                            vTitle.style.color = "var(--danger)";
+                            vDesc.innerHTML = "Cuenta rechazada por KYC.";
+                            stopSpinners();
                         }
                     });
                 } else if(user.status === 'rejected') {
-                    document.getElementById('authTitle').style.display = 'none'; document.getElementById('authSubtitle').style.display = 'none';
-                    document.querySelectorAll('.auth-input').forEach(f => f.style.display = 'none'); document.getElementById('authActionButton').style.display = 'none';
-                    document.querySelector('.auth-switch').style.display = 'none'; const tcCont = document.getElementById('tcContainer'); if(tcCont) tcCont.style.display = 'none';
-                    document.getElementById('verificationBlock').style.display = 'flex';
-                    document.getElementById('verifStatusTitle').innerText = "ACCESO DENEGADO"; document.getElementById('verifStatusTitle').style.color = "var(--danger)";
+                    document.getElementById('verifStatusTitle').innerText = "ACCESO DENEGADO";
+                    document.getElementById('verifStatusTitle').style.color = "var(--danger)";
                     document.getElementById('verifStatusDesc').innerText = "Cuenta bloqueada permanentemente.";
-                    document.getElementById('tsRing1').style.animation = 'none'; document.getElementById('tsRing2').style.animation = 'none';
-                    document.getElementById('tsCore').style.background = 'var(--danger)'; document.getElementById('tsCore').innerText = '✖';
+                    stopSpinners();
                 } else {
                     document.getElementById('authOverlay').style.display = "none";
                     initApp();
                 }
-            }).catch((error) => {
-                errorMsg.innerText = "Error: " + error.message; errorMsg.style.display = "block";
-            });
+            }).catch(e => restoreAuthUI(e.message));
         }
 
-        function saveProgress() { if(isFirebaseActive && firebase.auth().currentUser && user) firebase.database().ref('users/' + firebase.auth().currentUser.uid).set(user); }
+        function stopSpinners() {
+            document.getElementById('tsRing1').style.animation = 'none';
+            document.getElementById('tsRing2').style.animation = 'none';
+            document.getElementById('tsCore').style.background = 'var(--danger)';
+            document.getElementById('tsCore').innerText = '✖';
+        }
 
+        function saveProgress() { 
+            if(isFirebaseActive && firebase.auth().currentUser && user) {
+                firebase.database().ref('users/' + firebase.auth().currentUser.uid).set(user);
+            }
+        }
+
+        // ==========================================
+        // CÁLCULOS EXACTOS DE MINERÍA (BTC/LTC/DASH)
+        // ==========================================
         function changeCoin(coinSymbol) {
             if(!user || !cryptoData[coinSymbol]) return;
             user.activeCoin = coinSymbol;
             document.querySelectorAll('.crypto-btn').forEach(btn => btn.classList.remove('active'));
             const btn = document.getElementById(`btn-${coinSymbol}`);
             if(btn) btn.classList.add('active');
+            
             document.getElementById('balanceLabel').innerText = `Saldo Minado (${coinSymbol})`;
+            
             const cardFront = document.querySelector('#basicPlanCard .card-front');
             if(cardFront) cardFront.innerText = coinSymbol === 'BTC' ? '₿' : (coinSymbol === 'LTC' ? 'Ł' : 'D');
+            
             updateWithdrawNetworks();
-            const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
-            document.getElementById('rateDisplay').innerText = `${(currentTier.baseBtcPerSec * cryptoData[coinSymbol].multiplier).toFixed(10)} ${coinSymbol}/s`;
-            saveProgress(); renderTiers(); 
+            
+            saveProgress();
+            renderTiers(); 
         }
 
-        const wdNetworks = { 'BTC': ['Bitcoin Network (BTC)', 'BEP20 (BSC)'], 'LTC': ['Litecoin Network', 'BEP20 (BSC)'], 'DASH': ['Dash Network'], 'USDT': ['TRC20 (Tron)', 'ERC20 (Ethereum)', 'BEP20 (BSC)', 'Polygon'] };
+        const wdNetworks = { 'BTC': ['Bitcoin Network', 'BEP20'], 'LTC': ['Litecoin Network', 'BEP20'], 'DASH': ['Dash Network'], 'USDT': ['TRC20', 'ERC20'] };
+
         function updateWithdrawNetworks() {
-            if(!user) return; const crypto = user.activeCoin; const netSelect = document.getElementById('wdNetworkSelect');
-            if(!netSelect) return; netSelect.innerHTML = '';
-            const networks = wdNetworks[crypto] || wdNetworks['USDT'];
-            networks.forEach(net => { const opt = document.createElement('option'); opt.value = net; opt.innerText = net; netSelect.appendChild(opt); });
+            if(!user) return;
+            const netSelect = document.getElementById('wdNetworkSelect');
+            if(!netSelect) return;
+            netSelect.innerHTML = '';
+            const networks = wdNetworks[user.activeCoin] || wdNetworks['USDT'];
+            networks.forEach(net => { 
+                const opt = document.createElement('option'); 
+                opt.value = net; opt.innerText = net; 
+                netSelect.appendChild(opt); 
+            });
         }
 
         function saveWithdrawMethod() {
-            if(!user) return; const address = document.getElementById('wdWalletAddress').value.trim();
-            if(address.length < 15) { showToast('⚠️ Dirección de billetera inválida.'); return; }
+            if(!user) return;
+            const address = document.getElementById('wdWalletAddress').value.trim();
+            if(address.length < 15) { showToast('⚠️ Ingrese billetera válida.'); return; }
             user.savedWallet = { crypto: user.activeCoin, network: document.getElementById('wdNetworkSelect').value, address: address };
-            saveProgress(); showToast('✅ Billetera guardada.');
+            saveProgress(); 
+            showToast('✅ Billetera guardada.');
         }
 
+        // ==========================================
+        // MODALES Y PAGOS
+        // ==========================================
         function openPaymentModal(tierId) {
             selectedTierForPayment = tiers.find(t => t.id === tierId);
             if(!selectedTierForPayment) return;
-            document.getElementById('modalPlanName').innerText = `Desbloquear ${selectedTierForPayment.name}`;
-            document.getElementById('modalPlanCost').innerText = selectedTierForPayment.costUSD.toLocaleString();
-            document.getElementById('paymentStatusArea').style.display = 'none'; document.getElementById('tfaArea').style.display = 'none'; document.getElementById('adArea').style.display = 'none';
-            document.getElementById('paymentInputArea').style.display = 'block'; document.getElementById('paymentOverlay').style.display = 'flex';
+            document.getElementById('modalPlanName').innerText = `Plan ${selectedTierForPayment.name}`;
+            document.getElementById('modalPlanCost').innerText = selectedTierForPayment.costUSD;
+            
+            document.getElementById('paymentStatusArea').style.display = 'none';
+            document.getElementById('tfaArea').style.display = 'none';
+            document.getElementById('adArea').style.display = 'none';
+            
+            document.getElementById('paymentInputArea').style.display = 'block';
+            document.getElementById('paymentOverlay').style.display = 'flex';
             updateWalletAddressModal();
         }
 
-        function closeModal() { document.getElementById('paymentOverlay').style.display = 'none'; selectedTierForPayment = null; }
-        
-        function updateWalletAddressModal() { const select = document.getElementById('cryptoNetworkSelect'); const display = document.getElementById('walletAddressDisplayModal'); if(select && display) display.value = paymentWallets[select.value] || ""; }
+        function closeModal() { document.getElementById('paymentOverlay').style.display = 'none'; }
+
+        function updateWalletAddressModal() { 
+            const select = document.getElementById('cryptoNetworkSelect');
+            const display = document.getElementById('walletAddressDisplayModal');
+            if(select && display) display.value = paymentWallets[select.value] || ""; 
+        }
 
         function processPayment() {
-            document.getElementById('paymentInputArea').style.display = 'none'; document.getElementById('paymentStatusArea').style.display = 'block';
-            const spinner = document.getElementById('paymentSpinner'); const successIcon = document.getElementById('paymentSuccessIcon'); const statusText = document.getElementById('paymentStatusText');
-            spinner.style.display = 'block'; successIcon.style.display = 'none';
-            statusText.innerHTML = `Registrando transacción...<br><span style="font-size:28px; color:#fff">$${selectedTierForPayment.costUSD.toLocaleString()} USD</span>`;
-            statusText.style.color = 'var(--primary)';
+            document.getElementById('paymentInputArea').style.display = 'none';
+            document.getElementById('paymentStatusArea').style.display = 'block';
+            document.getElementById('paymentSpinner').style.display = 'block'; 
+            document.getElementById('paymentSuccessIcon').style.display = 'none';
+            
+            const statusText = document.getElementById('paymentStatusText');
+            statusText.innerHTML = `Registrando pago...<br><span style="font-size:24px; color:#fff">$${selectedTierForPayment.costUSD} USD</span>`;
 
             setTimeout(() => {
-                if(!user.systemHistory) user.systemHistory = []; if(!user.pendingTiers) user.pendingTiers = [];
+                if(!user.systemHistory) user.systemHistory = [];
+                if(!user.pendingTiers) user.pendingTiers = [];
+
                 user.pendingTiers.push(selectedTierForPayment.id);
-                user.systemHistory.push({ type: 'deposit_pending', detail: `Verificación: Compra ${selectedTierForPayment.name}`, planName: selectedTierForPayment.name, amount: selectedTierForPayment.costUSD.toFixed(2), date: new Date().toLocaleString(), requestedTierId: selectedTierForPayment.id });
-                saveProgress(); renderHistory(); renderTiers(); closeModal(); 
-                showToast('⏳ <b>Pago en Revisión</b><br>Su minero se activará automáticamente.');
-            }, 5000);
+                user.systemHistory.push({ 
+                    type: 'deposit_pending', 
+                    detail: `Compra de ${selectedTierForPayment.name}`, 
+                    amount: selectedTierForPayment.costUSD.toFixed(2), 
+                    date: new Date().toLocaleString(),
+                });
+                
+                saveProgress(); 
+                if(typeof renderHistory === 'function') renderHistory();
+                renderTiers(); 
+                closeModal(); 
+                showToast('⏳ <b>En Revisión</b><br>Se activará al ser verificado.');
+            }, 3000);
         }
 
+        // ==========================================
+        // HISTORIAL DE TRANSACCIONES
+        // ==========================================
         function renderHistory() {
-            const tbody = document.getElementById('historyTableBody'); if(!tbody) return; tbody.innerHTML = '';
-            if(!user || !user.systemHistory || user.systemHistory.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Sin transacciones recientes</td></tr>'; document.getElementById('totalRecordsLabel').innerText = "0 Logs"; return; }
+            const tbody = document.getElementById('historyTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            if(!user || !user.systemHistory || user.systemHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Sin transacciones</td></tr>';
+                document.getElementById('totalRecordsLabel').innerText = "0";
+                return;
+            }
+            
             const historyReversed = [...user.systemHistory].reverse();
-            document.getElementById('totalRecordsLabel').innerText = `${historyReversed.length} Logs`;
+            document.getElementById('totalRecordsLabel').innerText = `${historyReversed.length} Registros`;
+            
             const totalPages = Math.ceil(historyReversed.length / itemsPerPage) || 1;
-            if(currentHistoryPage > totalPages) currentHistoryPage = totalPages; if(currentHistoryPage < 1) currentHistoryPage = 1;
-            document.getElementById('pageIndicator').innerText = `Página ${currentHistoryPage} de ${totalPages}`;
-            document.getElementById('btnPrevPage').disabled = currentHistoryPage === 1; document.getElementById('btnNextPage').disabled = currentHistoryPage === totalPages;
-            const pageItems = historyReversed.slice((currentHistoryPage - 1) * itemsPerPage, ((currentHistoryPage - 1) * itemsPerPage) + itemsPerPage);
+            if(currentHistoryPage > totalPages) currentHistoryPage = totalPages;
+            if(currentHistoryPage < 1) currentHistoryPage = 1;
+            
+            document.getElementById('pageIndicator').innerText = `${currentHistoryPage} / ${totalPages}`;
+            document.getElementById('btnPrevPage').disabled = currentHistoryPage === 1;
+            document.getElementById('btnNextPage').disabled = currentHistoryPage === totalPages;
+            
+            const startIdx = (currentHistoryPage - 1) * itemsPerPage;
+            const pageItems = historyReversed.slice(startIdx, startIdx + itemsPerPage);
             
             pageItems.forEach(item => {
-                let typeBadge = '';
-                if(item.type === 'deposit_pending') typeBadge = '<span class="badge-type" style="background:rgba(245, 158, 11, 0.2); color:#f59e0b; border:1px solid rgba(245, 158, 11, 0.4);">Revisión</span>';
-                else if(item.type === 'activation') typeBadge = '<span class="badge-type type-activation">Upgrade</span>';
-                else if(item.type === 'withdraw') typeBadge = '<span class="badge-type type-withdraw">Retiro</span>';
-                else typeBadge = `<span class="badge-type" style="background:rgba(255,255,255,0.1); color:white;">${item.type}</span>`;
+                let badge = '';
+                if(item.type === 'deposit_pending') badge = '<span class="badge-type" style="background:rgba(245,158,11,0.2); color:#f59e0b;">Revisión</span>';
+                else if(item.type === 'activation') badge = '<span class="badge-type type-activation">Upgrade</span>';
+                else if(item.type === 'withdraw') badge = '<span class="badge-type type-withdraw">Retiro</span>';
                 
-                // En móvil cortamos el detalle para que quepa
-                let det = item.detail || item.planName;
-                if(window.innerWidth < 1000 && det.length > 20) det = det.substring(0,20)+'...';
-
-                tbody.innerHTML += `<tr><td>${typeBadge}</td><td>${det}</td><td style="color:var(--success); font-family:monospace;">$${item.amount}</td></tr>`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${badge}</td>
+                        <td style="max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.detail || item.planName}</td>
+                        <td class="mono" style="color:var(--success); font-weight:bold;">$${item.amount}</td>
+                    </tr>
+                `;
             });
         }
+
         function changePage(dir) { currentHistoryPage += dir; renderHistory(); }
 
+        // ==========================================
+        // ANUNCIOS Y RETIROS
+        // ==========================================
         function watchAdForBoost() {
             if(!user) return;
             window.open('https://www.effectivecpmnetwork.com/cdm2stes5?key=dd299ad126427e65e882db7d35341c99', '_blank');
-            document.getElementById('paymentInputArea').style.display = 'none'; document.getElementById('paymentStatusArea').style.display = 'none'; document.getElementById('tfaArea').style.display = 'none';
-            document.getElementById('adArea').style.display = 'block'; document.getElementById('paymentOverlay').style.display = 'flex';
-            let timeLeft = 15; document.getElementById('adTimerText').innerText = timeLeft;
+
+            document.getElementById('paymentInputArea').style.display = 'none';
+            document.getElementById('tfaArea').style.display = 'none';
+            document.getElementById('adArea').style.display = 'block';
+            document.getElementById('paymentOverlay').style.display = 'flex';
+            
+            let timeLeft = 15; 
+            const timerText = document.getElementById('adTimerText');
+            if(timerText) timerText.innerText = timeLeft;
+            
             const adInterval = setInterval(() => {
-                timeLeft--; document.getElementById('adTimerText').innerText = timeLeft;
+                timeLeft--;
+                if(timerText) timerText.innerText = timeLeft;
                 if(timeLeft <= 0) {
-                    clearInterval(adInterval); user.boostUntil = Date.now() + (10 * 60 * 1000); saveProgress(); closeModal();
-                    showToast('🚀 <b>Boost Exitoso</b><br>+1.05 TH/s por 10 minutos.');
+                    clearInterval(adInterval);
+                    user.boostUntil = Date.now() + (10 * 60 * 1000); 
+                    saveProgress();
+                    closeModal();
+                    showToast('🚀 <b>Potencia Inyectada</b><br>+1.05 TH/s por 10 minutos.');
                 }
             }, 1000);
         }
 
         function initiateWithdraw() {
             if(!user) return;
-            if(!user.savedWallet || !user.savedWallet.address) { showToast('⚠️ Guarde su Método de Retiro.'); return; }
-            const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
+            if(!user.savedWallet || !user.savedWallet.address) {
+                showToast('⚠️ Configure Método de Retiro primero.');
+                return;
+            }
             const currentUSD = user.balances[user.activeCoin] * cryptoData[user.activeCoin].price;
-            const targetUSD = getMinWithdrawUSD(user.tierId, user.activeCoin);
-            if(currentUSD < targetUSD) { showToast(`⚠️ <b>Saldo Insuficiente</b><br>Mínimo en ${user.activeCoin} es $${targetUSD.toFixed(2)}.`); return; }
+            const targetUSD = getMinWithdrawUSD(user.tierId); // Constante USD
+
+            if(currentUSD < targetUSD) {
+                showToast(`⚠️ <b>Saldo Insuficiente</b><br>Mínimo: $${targetUSD.toFixed(2)} USD.`);
+                return;
+            }
+
+            const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
             withdrawAmountTemp = currentUSD - (currentUSD * currentTier.gasFee);
-            document.getElementById('paymentInputArea').style.display = 'none'; document.getElementById('paymentStatusArea').style.display = 'none'; document.getElementById('adArea').style.display = 'none';
-            document.getElementById('tfaArea').style.display = 'block'; document.getElementById('tfaCode').value = ''; document.getElementById('paymentOverlay').style.display = 'flex';
+
+            document.getElementById('paymentInputArea').style.display = 'none';
+            document.getElementById('adArea').style.display = 'none';
+            document.getElementById('tfaArea').style.display = 'block';
+            document.getElementById('tfaCode').value = '';
+            document.getElementById('paymentOverlay').style.display = 'flex';
         }
 
         function verify2FA() {
             const code = document.getElementById('tfaCode').value;
             if(code.length !== 6) { showToast("⚠️ Código 2FA inválido."); return; }
-            if(!user.systemHistory) user.systemHistory = [];
+
             user.balances[user.activeCoin] = 0; 
-            user.systemHistory.push({ type: 'withdraw', detail: `Retiro a ...${user.savedWallet.address.slice(-5)}`, amount: withdrawAmountTemp.toFixed(2), date: new Date().toLocaleString() });
-            saveProgress(); closeModal(); triggerMoneyRain(); showToast(`✅ <b>Retiro Autorizado</b><br>$${withdrawAmountTemp.toFixed(2)} enviados.`);
+            user.systemHistory.push({
+                type: 'withdraw',
+                detail: `Retiro a ...${user.savedWallet.address.slice(-5)}`,
+                amount: withdrawAmountTemp.toFixed(2),
+                date: new Date().toLocaleString()
+            });
+
+            saveProgress();
+            closeModal();
+            triggerMoneyRain(); 
+            showToast(`✅ <b>Retiro Exitoso</b><br>Procesando $${withdrawAmountTemp.toFixed(2)} USD.`);
         }
 
+        // ==========================================
+        // MOTOR DE MINERÍA (MATEMÁTICA EXACTA)
+        // ==========================================
         function turnOnMiner() {
-            if(!user) return; user.isMinerRunning = true;
+            if(!user) return;
+            user.isMinerRunning = true;
             document.getElementById('minerActivationOverlay').style.display = 'none';
-            saveProgress(); showToast('✅ Rig Encendido. Minando...');
+            saveProgress();
+            showToast('✅ Rig Encendido.');
         }
 
         let isMiningLoopActive = false;
         function startMiningLoop() {
-            if(isMiningLoopActive) return; isMiningLoopActive = true;
-            if(user && user.isMinerRunning) document.getElementById('minerActivationOverlay').style.display = 'none';
+            if(isMiningLoopActive) return;
+            isMiningLoopActive = true;
+            
+            if(user && user.isMinerRunning) {
+                document.getElementById('minerActivationOverlay').style.display = 'none';
+            }
             
             setInterval(() => {
                 if(!user || !user.isMinerRunning) return; 
-                const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0]; const coinConfig = cryptoData[user.activeCoin];
-                if(user.tierId > 1 && user.minerCondition > 0) { user.minerCondition -= 0.02; if(user.minerCondition <= 0) user.minerCondition = 0; }
-                const cortex = document.querySelector('.cortex-module'); const btnMaint = document.getElementById('btnMaintenance');
-                if(user.minerCondition <= 20 && user.tierId > 1) { if(cortex) cortex.style.borderColor = 'var(--danger)'; if(btnMaint) btnMaint.style.display = 'block'; } else { if(cortex) cortex.style.borderColor = 'var(--rig-frame)'; if(btnMaint) btnMaint.style.display = 'none'; }
+
+                const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
+                const coinConfig = cryptoData[user.activeCoin];
+                
+                if(user.tierId > 1 && user.minerCondition > 0) {
+                    user.minerCondition -= 0.02; 
+                    if(user.minerCondition <= 0) user.minerCondition = 0;
+                }
+
+                const cortex = document.querySelector('.cortex-module');
+                const btnMaint = document.getElementById('btnMaintenance');
+                if(user.minerCondition <= 20 && user.tierId > 1) {
+                    if(cortex) cortex.style.borderColor = 'var(--danger)';
+                    if(btnMaint) btnMaint.style.display = 'block';
+                } else {
+                    if(cortex) cortex.style.borderColor = 'var(--rig-frame)';
+                    if(btnMaint) btnMaint.style.display = 'none';
+                }
 
                 let efficiency = (user.minerCondition === 0 && user.tierId > 1) ? 0.1 : 1;
-                let extraBoostMath = 0; let displayHashExtra = "";
+
+                let extraBoostBtc = 0; 
+                let rouletteBoostBtc = 0;
+                let displayHashExtra = "";
+                
                 const badge = document.getElementById('boostBadge');
-                if(Date.now() < user.boostUntil) { extraBoostMath = (currentTier.baseBtcPerSec / parseFloat(currentTier.hashrate)) * 1.05; displayHashExtra = " + 1.05 TH/s"; if(badge) badge.style.display = 'inline'; } else { if(badge) badge.style.display = 'none'; }
-                let rouletteBoostMath = user.bonusHashrate > 0 ? (currentTier.baseBtcPerSec / parseFloat(currentTier.hashrate)) * user.bonusHashrate : 0;
-                if(user.bonusHashrate > 0) displayHashExtra += ` (+${user.bonusHashrate.toFixed(2)})`;
+                if(Date.now() < user.boostUntil) {
+                    extraBoostBtc = (currentTier.baseBtcPerSec / parseFloat(currentTier.hashrate)) * 1.05;
+                    displayHashExtra = " + 1.05 TH/s";
+                    if(badge) badge.style.display = 'inline';
+                } else {
+                    if(badge) badge.style.display = 'none';
+                }
+
+                if(user.bonusHashrate > 0) {
+                    rouletteBoostBtc = (currentTier.baseBtcPerSec / parseFloat(currentTier.hashrate)) * user.bonusHashrate;
+                    displayHashExtra += ` (+${user.bonusHashrate.toFixed(2)})`;
+                }
+
+                const hashDisplay = document.getElementById('hashrateDisplay');
+                if(hashDisplay) hashDisplay.innerText = currentTier.hashrate + displayHashExtra;
+
+                // CÁLCULO EXACTO BASADO EN PRECIO REAL
+                let totalBtcPerSec = (currentTier.baseBtcPerSec + extraBoostBtc + rouletteBoostBtc) * efficiency;
+                let usdEarnedPerSec = totalBtcPerSec * cryptoData['BTC'].price;
+                let coinEarned = usdEarnedPerSec / coinConfig.price;
+
+                user.balances[user.activeCoin] += coinEarned;
                 
-                const hashDisplay = document.getElementById('hashrateDisplay'); if(hashDisplay) hashDisplay.innerText = currentTier.hashrate + displayHashExtra;
-                user.balances[user.activeCoin] += ((currentTier.baseBtcPerSec + extraBoostMath + rouletteBoostMath) * coinConfig.multiplier * efficiency);
-                const currentBalance = user.balances[user.activeCoin]; const currentUSD = currentBalance * coinConfig.price;
-                const balEl = document.getElementById('cryptoBalance'); const usdEl = document.getElementById('usdBalance');
-                if(balEl) balEl.innerText = currentBalance.toFixed(10); if(usdEl) usdEl.innerText = currentUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                const currentBalance = user.balances[user.activeCoin];
+                const currentUSD = currentBalance * coinConfig.price;
+
+                const balEl = document.getElementById('cryptoBalance');
+                const usdEl = document.getElementById('usdBalance');
+                const rateEl = document.getElementById('rateDisplay');
                 
-                const pCur = document.getElementById('progCurrent'); const pTar = document.getElementById('progTarget'); const pFill = document.getElementById('progFill');
-                const targetUSD = getMinWithdrawUSD(user.tierId, user.activeCoin);
-                if(pCur) pCur.innerText = currentUSD.toFixed(2); if(pTar) pTar.innerText = targetUSD.toFixed(2);
-                if(pFill) { let pct = (currentUSD / targetUSD) * 100; if(pct > 100) pct = 100; pFill.style.width = `${pct}%`; }
+                if(balEl) balEl.innerText = currentBalance.toFixed(10); 
+                if(usdEl) usdEl.innerText = currentUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                if(rateEl) rateEl.innerText = `${coinEarned.toFixed(10)} ${coinConfig.symbol}/s`;
+                
+                const pCur = document.getElementById('progCurrent');
+                const pTar = document.getElementById('progTarget');
+                const pFill = document.getElementById('progFill');
+                const targetUSD = getMinWithdrawUSD(user.tierId);
+                
+                if(pCur) pCur.innerText = currentUSD.toFixed(2);
+                if(pTar) pTar.innerText = targetUSD.toFixed(2);
+                
+                if(pFill) {
+                    let progressPercent = (currentUSD / targetUSD) * 100;
+                    if(progressPercent > 100) progressPercent = 100;
+                    pFill.style.width = `${progressPercent}%`;
+                }
+
                 saveProgress();
             }, 1000);
 
             setInterval(() => {
-                if(!user) return; const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
+                if(!user) return;
+                const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
                 const randomRot = Math.floor(Math.random() * (currentTier.needleRange[1] - currentTier.needleRange[0])) + currentTier.needleRange[0];
-                const needle = document.getElementById('hMeterNeedleSvg'); if(needle) needle.style.transform = `rotate(${randomRot - 90}deg)`;
+                const needle = document.getElementById('hMeterNeedleSvg');
+                if(needle) needle.style.transform = `rotate(${randomRot - 90}deg)`;
             }, 800);
         }
 
-        function openReferrals() {
-            if(!user) return; const uidStr = user.idUsuario || (user.uid ? user.uid.slice(0,8).toUpperCase() : "102938");
-            document.getElementById('refUserIdDisplay').innerText = uidStr;
-            document.getElementById('refLinkInput').value = `${window.location.origin + window.location.pathname}?ref=${uidStr}`;
-            if(!user.referrals) user.referrals = { lvl1: 0, lvl2: 0, lvl3: 0, earn1: 0, earn2: 0, earn3: 0 };
-            document.getElementById('refCount1').innerText = user.referrals.lvl1; document.getElementById('refCount2').innerText = user.referrals.lvl2; document.getElementById('refCount3').innerText = user.referrals.lvl3;
-            document.getElementById('refEarn1').innerText = `+$${user.referrals.earn1.toFixed(2)}`; document.getElementById('refEarn2').innerText = `+$${user.referrals.earn2.toFixed(2)}`; document.getElementById('refEarn3').innerText = `+$${user.referrals.earn3.toFixed(2)}`;
-            document.getElementById('refTotalEarn').innerText = `$${(user.referrals.earn1 + user.referrals.earn2 + user.referrals.earn3).toFixed(2)}`;
-            document.getElementById('referralModal').style.display = 'flex';
-        }
-        function copyRefLink() { const copyText = document.getElementById("refLinkInput"); copyText.select(); document.execCommand("copy"); showToast("✅ <b>Enlace Copiado</b>"); }
-
-        function updateCalculator() {
-            if(!user) return; const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
-            const dailyUSD = currentTier.baseBtcPerSec * 86400 * cryptoData['BTC'].price;
-            document.getElementById('calcMinerName').innerText = currentTier.name; document.getElementById('calcCost').innerText = `$${currentTier.costUSD.toFixed(2)}`; document.getElementById('calcEarnDaily').innerText = `$${dailyUSD.toFixed(2)}`; document.getElementById('calcEarn30').innerText = `$${(dailyUSD * 30).toFixed(2)}`;
-            const roiDays = currentTier.costUSD > 0 ? Math.ceil(currentTier.costUSD / dailyUSD) : "Infinito";
-            const roiEl = document.getElementById('calcRoi'); roiEl.innerText = currentTier.costUSD === 0 ? "Largo Plazo" : `${roiDays} Días`; roiEl.style.color = currentTier.costUSD === 0 ? 'var(--warning)' : (roiDays <= 30 ? 'var(--success)' : 'var(--danger)');
-        }
-        const originalActivateTier = activateTier; activateTier = function(tierId) { originalActivateTier(tierId); updateCalculator(); };
-
-        function openRoulette() {
-            if(Date.now() - user.lastSpinDate < 7200000) { const msLeft = 7200000 - (Date.now() - user.lastSpinDate); showToast(`⏳ Vuelve en ${Math.floor(msLeft / 3600000)}h ${Math.ceil((msLeft % 3600000) / 60000)}m`); return; }
-            document.getElementById('btnSpin').disabled = false; document.getElementById('btnSpin').innerText = "TIRAR RULETA"; document.getElementById('rouletteModal').style.display = 'flex';
-        }
-        function spinRoulette() {
-            document.getElementById('btnSpin').disabled = true; document.getElementById('btnSpin').innerText = "GIRANDO...";
-            const wheel = document.getElementById('rouletteWheel'); wheel.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.3, 1)'; wheel.style.transform = `rotate(${(360 * 6) + 330}deg)`;
-            setTimeout(() => { user.bonusHashrate += 0.05; user.lastSpinDate = Date.now(); saveProgress(); document.getElementById('rouletteModal').style.display = 'none'; showToast('🎰 <b>¡Por poco!</b><br>Consuelo: +0.05 TH/s extra.'); wheel.style.transition = 'none'; wheel.style.transform = `rotate(0deg)`; }, 5200);
-        }
-        function repairMiner() {
-            const repairCost = 2; if((user.balances[user.activeCoin] * cryptoData[user.activeCoin].price) < repairCost) { showToast(`⚠️ Necesitas $2.00 USD minados para reparar.`); return; }
-            user.balances[user.activeCoin] -= (repairCost / cryptoData[user.activeCoin].price); user.minerCondition = 100; saveProgress(); showToast('🔧 <b>Reparado</b>');
-        }
-
-        function triggerMoneyRain() {
-            const rc = document.getElementById('moneyRainContainer'); if(!rc) return; rc.style.display = 'block';
-            for(let i=0; i<40; i++) { const m = document.createElement('div'); m.className = 'money-drop'; m.innerText = '💸'; m.style.left = Math.random() * 100 + 'vw'; m.style.animationDuration = (Math.random() * 2 + 2) + 's'; m.style.animationDelay = (Math.random() * 1.5) + 's'; rc.appendChild(m); }
-            setTimeout(() => { rc.innerHTML = ''; rc.style.display = 'none'; }, 5000);
-        }
-        const originalVerify2FA = verify2FA; verify2FA = function() { originalVerify2FA(); setTimeout(() => { if(document.getElementById('tfaArea').style.display === 'none') triggerMoneyRain(); }, 500); };
-
-        function startTicker() {
-            const names = ["0x8A2..9B1", "1Cx7..4Fz", "T4aW..1Yq", "0x91D..3A2", "bc1q..m9pz"]; const plans = ["ProMiner X", "AntCluster 1200", "Quantum H-Core"];
-            setInterval(() => { const t = document.getElementById('socialTicker'); if(!t) return; t.innerHTML = `Usuario ${names[Math.floor(Math.random() * names.length)]} ${Math.random() > 0.5 ? `compró <b>${plans[Math.floor(Math.random() * plans.length)]}</b>` : `retiró <b>$${Math.floor(Math.random()*80)+15}</b>`}.`; }, 8000);
-        }
-        startTicker();
-
-        const fomoNames = ["0x4A2..8F1", "1Bz8..9Qz", "0x99D..2B4", "T9aR..5Vw"]; let isFomoActive = false;
+        // ==========================================
+        // FUNCIONES DE APOYO (FOMO, RULETA, REF)
+        // ==========================================
+        const fomoNames = ["0x4A2...", "1Bz8...", "0x99D...", "T9aR...", "bc1q..."];
+        let isFomoActive = false;
         function startFomoSystem() {
-            if(isFomoActive) return; isFomoActive = true;
+            if(isFomoActive) return;
+            isFomoActive = true;
             setInterval(() => {
                 if(Math.random() > 0.4) { 
-                    const container = document.getElementById('fomo-container'); if(!container) return; const popup = document.createElement('div'); popup.className = 'fomo-popup';
-                    popup.innerHTML = `<span class="fomo-icon">💸</span> <div><b>Retiro Exitoso</b><br>${fomoNames[Math.floor(Math.random() * fomoNames.length)]} retiró $${Math.floor(Math.random() * 80) + 15} USD.</div>`;
-                    container.appendChild(popup); setTimeout(() => popup.remove(), 6000);
+                    const randomName = fomoNames[Math.floor(Math.random() * fomoNames.length)];
+                    const randomAmt = Math.floor(Math.random() * 80) + 15; 
+                    const container = document.getElementById('fomo-container');
+                    if(!container) return;
+                    const popup = document.createElement('div');
+                    popup.className = 'fomo-popup';
+                    popup.innerHTML = `<span class="fomo-icon">💸</span> <div><b>Retiro Exitoso</b><br>${randomName} retiró $${randomAmt} USD.</div>`;
+                    container.appendChild(popup);
+                    setTimeout(() => popup.remove(), 6000);
                 }
             }, 20000);
         }
 
+        function updateCalculator() {
+            if(!user) return;
+            const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
+            const dailyUSD = currentTier.baseBtcPerSec * 86400 * cryptoData['BTC'].price;
+            const monthlyUSD = dailyUSD * 30;
+
+            document.getElementById('calcMinerName').innerText = currentTier.name;
+            document.getElementById('calcCost').innerText = `$${currentTier.costUSD.toFixed(2)}`;
+            document.getElementById('calcEarnDaily').innerText = `$${dailyUSD.toFixed(2)}`;
+            document.getElementById('calcEarn30').innerText = `$${monthlyUSD.toFixed(2)}`;
+            
+            const roiDays = currentTier.costUSD > 0 ? Math.ceil(currentTier.costUSD / dailyUSD) : "Infinito";
+            const roiEl = document.getElementById('calcRoi');
+            roiEl.innerText = currentTier.costUSD === 0 ? "Largo Plazo" : `${roiDays} Días`;
+            roiEl.style.color = currentTier.costUSD === 0 ? 'var(--warning)' : (roiDays <= 30 ? 'var(--success)' : 'var(--danger)');
+        }
+
+        function openReferrals() {
+            if(!user) return;
+            const uidStr = user.idUsuario || user.uid.slice(0,8).toUpperCase();
+            document.getElementById('refUserIdDisplay').innerText = uidStr;
+            document.getElementById('refLinkInput').value = `${window.location.origin}${window.location.pathname}?ref=${uidStr}`;
+            
+            document.getElementById('refCount1').innerText = user.referrals.lvl1 || 0;
+            document.getElementById('refCount2').innerText = user.referrals.lvl2 || 0;
+            document.getElementById('refCount3').innerText = user.referrals.lvl3 || 0;
+            document.getElementById('refEarn1').innerText = `+$${(user.referrals.earn1||0).toFixed(2)}`;
+            document.getElementById('refEarn2').innerText = `+$${(user.referrals.earn2||0).toFixed(2)}`;
+            document.getElementById('refEarn3').innerText = `+$${(user.referrals.earn3||0).toFixed(2)}`;
+            
+            document.getElementById('refTotalEarn').innerText = `$${((user.referrals.earn1||0)+(user.referrals.earn2||0)+(user.referrals.earn3||0)).toFixed(2)} USD`;
+            document.getElementById('referralModal').style.display = 'flex';
+        }
+
+        function copyRefLink() {
+            const copyText = document.getElementById("refLinkInput");
+            copyText.select();
+            document.execCommand("copy");
+            showToast("✅ <b>Enlace Copiado</b>");
+        }
+
+        function openRoulette() {
+            const now = Date.now();
+            if(now - user.lastSpinDate < 7200000) { 
+                const msLeft = 7200000 - (now - user.lastSpinDate);
+                showToast(`⏳ Vuelve en ${Math.floor(msLeft/3600000)}h ${Math.ceil((msLeft%3600000)/60000)}m.`);
+                return;
+            }
+            document.getElementById('btnSpin').disabled = false;
+            document.getElementById('btnSpin').innerText = "TIRAR DE LA RULETA";
+            document.getElementById('rouletteModal').style.display = 'flex';
+        }
+
+        function spinRoulette() {
+            const wheel = document.getElementById('rouletteWheel');
+            document.getElementById('btnSpin').disabled = true;
+            document.getElementById('btnSpin').innerText = "GIRANDO...";
+            
+            wheel.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.3, 1)';
+            wheel.style.transform = `rotate(${(360 * 6) + 330}deg)`;
+            
+            setTimeout(() => {
+                user.bonusHashrate += 0.05; 
+                user.lastSpinDate = Date.now();
+                saveProgress();
+                document.getElementById('rouletteModal').style.display = 'none';
+                showToast('🎰 <b>¡Por poco ganas el JackPot!</b><br>Como consuelo ganaste +0.05 TH/s extra.');
+                wheel.style.transition = 'none'; 
+                wheel.style.transform = `rotate(0deg)`;
+            }, 5200);
+        }
+
+        function repairMiner() {
+            if(user.balances[user.activeCoin] * cryptoData[user.activeCoin].price < 2) {
+                showToast(`⚠️ Necesitas al menos $2.00 USD para hacer mantenimiento.`);
+                return;
+            }
+            user.balances[user.activeCoin] -= (2 / cryptoData[user.activeCoin].price);
+            user.minerCondition = 100;
+            saveProgress();
+            showToast('🔧 <b>Mantenimiento Completado</b>');
+        }
+
+        function triggerMoneyRain() {
+            const rc = document.getElementById('moneyRainContainer');
+            rc.style.display = 'block';
+            for(let i=0; i<40; i++) {
+                const m = document.createElement('div');
+                m.className = 'money-drop';
+                m.innerText = '💸';
+                m.style.left = Math.random() * 100 + 'vw';
+                m.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                m.style.animationDelay = (Math.random() * 1.5) + 's';
+                rc.appendChild(m);
+            }
+            setTimeout(() => { rc.innerHTML = ''; rc.style.display = 'none'; }, 5000);
+        }
+
+        function startTicker() {
+            const names = ["0x8A2...", "1Cx7...", "T4aW...", "0x91D..."];
+            setInterval(() => {
+                const t = document.getElementById('socialTicker');
+                if(t) t.innerHTML = `Usuario ${names[Math.floor(Math.random()*names.length)]} retiró $${Math.floor(Math.random()*80)+15} USD`;
+            }, 8000);
+        }
+
+        // ==========================================
+        // ANIMACIONES DE FONDO (CANVAS)
+        // ==========================================
         const canvas = document.getElementById('matrixCanvas'); const ctx = canvas.getContext('2d');
         const canvasAuth = document.getElementById('coinsCanvasAuth'); const ctxAuth = canvasAuth.getContext('2d');
         let coinsArray = []; const coinSymbols = ['₿', 'Ł', 'Ð', 'ETH', 'USDT'];
-        function initCoins() { coinsArray = []; for(let i=0; i<25; i++) coinsArray.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, size: Math.random() * 25 + 15, speed: Math.random() * 3 + 1, symbol: coinSymbols[Math.floor(Math.random() * coinSymbols.length)], color: Math.random() > 0.3 ? '#f7931a' : '#94a3b8' }); }
-        function resizeCanvas() { canvas.height = window.innerHeight; canvas.width = window.innerWidth; canvasAuth.height = window.innerHeight; canvasAuth.width = window.innerWidth; initCoins(); }
+
+        function resizeCanvas() { 
+            canvas.height = window.innerHeight; canvas.width = window.innerWidth; 
+            canvasAuth.height = window.innerHeight; canvasAuth.width = window.innerWidth; 
+            coinsArray = [];
+            for(let i=0; i<35; i++) {
+                coinsArray.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, size: Math.random() * 25 + 15, speed: Math.random() * 3 + 1, symbol: coinSymbols[Math.floor(Math.random() * coinSymbols.length)], color: Math.random() > 0.3 ? '#f7931a' : '#94a3b8' });
+            }
+        }
         window.addEventListener('resize', resizeCanvas); resizeCanvas();
-        const characters = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789₿@#$*+-%"; const fontSize = 14; let columns = canvas.width / fontSize; let drops = Array(Math.floor(columns)).fill(1);
+
+        const characters = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789₿@#$*+-%"; const fontSize = 14; 
+        let columns = canvas.width / fontSize; let drops = Array(Math.floor(columns)).fill(1);
+
         function drawAnimations() {
-            ctx.fillStyle = "rgba(3, 4, 6, 0.08)"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.font = fontSize + "px monospace"; 
+            ctx.fillStyle = "rgba(13, 15, 20, 0.1)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = fontSize + "px monospace"; 
             const matrixColor = getComputedStyle(document.body).getPropertyValue('--matrix-color').trim();
-            for (let i = 0; i < drops.length; i++) { ctx.fillStyle = matrixColor; ctx.fillText(characters.charAt(Math.floor(Math.random() * characters.length)), i * fontSize, drops[i] * fontSize); if (drops[i] * fontSize > canvas.height && Math.random() > 0.985) drops[i] = 0; drops[i]++; }
+
+            for (let i = 0; i < drops.length; i++) {
+                ctx.fillStyle = matrixColor; ctx.fillText(characters.charAt(Math.floor(Math.random() * characters.length)), i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.985) drops[i] = 0;
+                drops[i]++;
+            }
+
             ctxAuth.clearRect(0, 0, canvasAuth.width, canvasAuth.height);
-            for(let i=0; i<coinsArray.length; i++) { let c = coinsArray[i]; ctxAuth.fillStyle = c.color; ctxAuth.font = `bold ${c.size}px Arial`; ctxAuth.shadowBlur = 10; ctxAuth.shadowColor = c.color; ctxAuth.fillText(c.symbol, c.x, c.y); c.y += c.speed; if(c.y > canvasAuth.height) { c.y = -40; c.x = Math.random() * canvasAuth.width; } }
+            for(let i=0; i<coinsArray.length; i++) {
+                let c = coinsArray[i];
+                ctxAuth.fillStyle = c.color; ctxAuth.font = `bold ${c.size}px Arial`;
+                ctxAuth.shadowBlur = 20; ctxAuth.shadowColor = c.color;
+                ctxAuth.fillText(c.symbol, c.x, c.y);
+                c.y += c.speed;
+                if(c.y > canvasAuth.height) { c.y = -40; c.x = Math.random() * canvasAuth.width; }
+            }
         }
         setInterval(drawAnimations, 50);
-
+        startTicker();
     </script>
 </body>
 </html>
