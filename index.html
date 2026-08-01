@@ -10,10 +10,662 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-    <!-- ESTILOS CSS -->
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- CONFIGURACIÓN BASE Y TEMAS DINÁMICOS --- */
+        :root {
+            --bg-color: #030406;
+            --panel-bg-dark: rgba(10, 12, 16, 0.25); 
+            --panel-bg-active: rgba(16, 19, 25, 0.45); 
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --android-bar: rgba(0, 0, 0, 0.8);
+            
+            --primary: #f7931a; 
+            --primary-dim: rgba(247, 147, 26, 0.15);
+            --success: #10b981;
+            --matrix-color: #00FF41;
+            --glow-intensity: 15px;
+            --rig-frame: rgba(28, 31, 38, 0.8);
+            --video-filter: contrast(1) brightness(1);
+        }
+
+        body[data-tier="2"] { 
+            --primary: #3b82f6; 
+            --primary-dim: rgba(59, 130, 246, 0.25); 
+            --matrix-color: #3b82f6; 
+            --glow-intensity: 25px; 
+            --rig-frame: rgba(59, 130, 246, 0.4); 
+            --video-filter: contrast(1.1) brightness(1.05); 
+        }
+        body[data-tier="3"] { 
+            --primary: #8b5cf6; 
+            --primary-dim: rgba(139, 92, 246, 0.3); 
+            --matrix-color: #8b5cf6; 
+            --glow-intensity: 35px; 
+            --rig-frame: rgba(139, 92, 246, 0.5); 
+            --video-filter: contrast(1.15) brightness(1.1); 
+        }
+        body[data-tier="4"] { 
+            --primary: #ef4444; 
+            --primary-dim: rgba(239, 68, 68, 0.35); 
+            --matrix-color: #ef4444; 
+            --glow-intensity: 50px; 
+            --rig-frame: rgba(239, 68, 68, 0.7); 
+            --video-filter: contrast(1.2) brightness(1.15); 
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Fira Code', monospace, sans-serif; 
+            font-size: 14px; 
+        }
+        
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            transition: all 0.5s ease; 
+        }
+        
+        #matrixCanvas { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: 0; 
+            opacity: 1; 
+        }
+        
+        .dashboard { 
+            position: relative; 
+            z-index: 1; 
+            max-width: 1400px; 
+            height: 100vh; 
+            margin: 0 auto; 
+            display: grid; 
+            grid-template-columns: 350px 1fr 350px; 
+            gap: 20px; 
+            padding: 20px; 
+            overflow-y: auto; 
+        }
+
+        /* --- NUEVO SISTEMA DE VERIFICACIÓN SOFISTICADO --- */
+        .register-only { 
+            display: none; 
+        }
+        
+        .verification-container {
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 0;
+            width: 100%;
+        }
+
+        .tech-spinner-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 30px auto;
+        }
+
+        .tech-spinner-ring1 {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 4px solid transparent;
+            border-top-color: var(--success);
+            border-bottom-color: var(--success);
+            border-radius: 50%;
+            animation: spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        }
+
+        .tech-spinner-ring2 {
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: spin 4s linear infinite reverse;
+        }
+
+        .tech-spinner-core {
+            position: absolute;
+            top: 40px; left: 40px; right: 40px; bottom: 40px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 30px var(--success);
+            animation: pulseCore 1.5s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #000;
+        }
+
+        .verification-text {
+            color: var(--success);
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            text-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+            animation: blinkText 1.5s infinite;
+        }
+
+        .verification-subtext {
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulseCore { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.3); opacity: 1; } }
+        @keyframes blinkText { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @media (max-width: 1000px) { .dashboard { grid-template-columns: 1fr; } }
+        
+        .card { 
+            background-color: var(--panel-bg-dark); 
+            backdrop-filter: blur(4px); 
+            -webkit-backdrop-filter: blur(4px); 
+            border-radius: 20px; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.1); 
+        }
+        .panel-header { 
+            padding: 15px 20px; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%); 
+        }
+        .panel-header h2 { 
+            font-size: 13px; 
+            color: var(--text-main); 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            text-shadow: 0 0 5px rgba(255,255,255,0.2);
+        }
+        .panel-content { 
+            padding: 20px; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px;
+        }
+
+        /* --- CONTROLES Y BALANCE --- */
+        .crypto-selector { 
+            display: flex; 
+            gap: 10px; 
+            background: rgba(0,0,0,0.5); 
+            padding: 5px; 
+            border-radius: 12px; 
+            border: 1px solid rgba(255,255,255,0.05); 
+        }
+        .crypto-btn { 
+            flex: 1; 
+            padding: 10px; 
+            background: transparent; 
+            border: none; 
+            color: var(--text-muted); 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            font-weight: bold; 
+        }
+        .crypto-btn.active { 
+            background: var(--primary); 
+            color: #000; 
+            box-shadow: 0 0 var(--glow-intensity) var(--primary-dim); 
+        }
+        .balance-main { 
+            text-align: center; 
+            padding: 25px 0; 
+            border-radius: 12px; 
+            background: rgba(0,0,0,0.5); 
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .balance-main .label { 
+            color: var(--text-muted); 
+            font-size: 12px; 
+        }
+        .balance-main .amount { 
+            font-size: 34px; 
+            font-weight: bold; 
+            color: var(--primary); 
+            font-family: monospace; 
+            text-shadow: 0 0 var(--glow-intensity) var(--primary-dim); 
+            margin: 5px 0;
+        }
+        .balance-main .usd { 
+            color: var(--success); 
+            font-size: 16px; 
+            font-weight: bold; 
+        }
+        
+        /* BARRA DE PROGRESO PSICOLÓGICA */
+        .progress-container { 
+            margin-top: 10px; 
+            padding: 10px; 
+            background: rgba(0,0,0,0.4); 
+            border-radius: 8px; 
+            border: 1px solid rgba(255,255,255,0.05); 
+        }
+        .progress-header { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 10px; 
+            color: var(--text-muted); 
+            margin-bottom: 5px; 
+            text-transform: uppercase;
+        }
+        .progress-track { 
+            width: 100%; 
+            height: 8px; 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 4px; 
+            overflow: hidden; 
+            position: relative;
+        }
+        .progress-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, var(--danger), var(--primary)); 
+            width: 0%; 
+            transition: width 0.5s ease; 
+            box-shadow: 0 0 10px var(--primary);
+        }
+        .gas-fee-label { 
+            font-size: 10px; 
+            color: var(--danger); 
+            text-align: center; 
+            margin-top: 5px; 
+            font-weight: bold;
+        }
+
+        .withdraw-config { 
+            border-top: 1px solid rgba(255,255,255,0.05); 
+            padding-top: 15px; 
+            margin-top: 5px; 
+        }
+        .withdraw-config h3 { 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            color: var(--text-muted); 
+            margin-bottom: 12px; 
+            text-align: center; 
+        }
+        .input-group { 
+            margin-bottom: 12px; 
+        }
+        .input-group label { 
+            display: block; 
+            font-size: 10px; 
+            color: var(--text-muted); 
+            margin-bottom: 4px; 
+            text-transform: uppercase;
+        }
+        .payment-select, .wallet-input { 
+            width: 100%; 
+            padding: 10px; 
+            background: rgba(0,0,0,0.6); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            color: white; 
+            border-radius: 8px; 
+            outline: none; 
+            font-family: monospace; 
+            font-size: 12px;
+        }
+        .wallet-input { 
+            color: var(--success); 
+            cursor: text;
+        }
+        
+        .btn-action { 
+            width: 100%; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            text-transform: uppercase; 
+            font-size: 12px; 
+            margin-top: 5px;
+        }
+        .btn-action.withdraw { 
+            background: rgba(255,255,255,0.05); 
+            color: var(--text-main); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            margin-top: 10px;
+        } 
+        .btn-action.withdraw:hover { 
+            background: rgba(255,255,255,0.15); 
+        }
+        .btn-action.save-btn { 
+            background: #166534; 
+            color: white; 
+        }
+
+        /* BOTÓN DE ANUNCIOS (BOOST) */
+        .btn-boost { 
+            background: linear-gradient(45deg, #8b5cf6, #3b82f6); 
+            color: white; 
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); 
+            border: none; 
+            padding: 15px; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            font-size: 12px; 
+            animation: pulseBoost 2s infinite;
+        }
+        @keyframes pulseBoost { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+        /* --- PANEL CENTRAL --- */
+        .central-panel-grid { display: flex; flex-direction: column; gap: 20px; height: 100%; }
+        .rig-visual-panel { background-color: rgba(0,0,0,0.4); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.04); display: grid; grid-template-rows: auto auto; gap: 20px; }
+        .cortex-module { background-color: #05070a; border-radius: 12px; border: 1px solid var(--rig-frame); position: relative; overflow: hidden; box-shadow: 0 0 30px var(--primary-dim), inset 0 0 40px rgba(0,0,0,0.9); height: 250px; transition: all 0.5s ease; }
+        .video-avatar-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: flex; justify-content: center; align-items: center;}
+        #minerVideo { width: 100%; height: 100%; object-fit: cover; filter: var(--video-filter); transition: filter 0.5s ease; z-index: 1;}
+        #videoErrorMsg { display: none; position: absolute; z-index: 5; color: #ef4444; font-weight: bold; text-align: center; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; border: 1px solid #ef4444; animation: pulseError 1s infinite; }
+        
+        .rotating-mining-card { width: 120px; height: 120px; perspective: 1000px; z-index: 2; display: none; }
+        .card-inner { width: 100%; height: 100%; transition: transform 1s; transform-style: preserve-3d; animation: rotateCard 4s infinite linear; }
+        @keyframes rotateCard { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; border-radius: 50%; border: 4px solid var(--primary); background: rgba(0,0,0,0.8); box-shadow: 0 0 25px var(--primary-dim); font-size: 55px; color: var(--primary); font-weight: bold; }
+        .card-back { transform: rotateY(180deg); font-size: 16px; border-color: var(--success); color: var(--success); }
+        .video-overlay-scanline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06)); background-size: 100% 4px, 3px 100%; z-index: 2; pointer-events: none; mix-blend-mode: overlay; }
+
+        .h-meter-advanced { position: absolute; top: 15px; right: 15px; width: 140px; background: rgba(0,0,0,0.8); border: 1px solid var(--primary-dim); border-radius: 8px; padding: 10px; z-index: 3; backdrop-filter: blur(5px); text-align: center;}
+        .h-meter-title { font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px;}
+        .gauge-svg { width: 100%; height: 50px; overflow: visible;}
+        .hardware-core-label { position: absolute; bottom: 15px; left: 20px; display: flex; align-items: baseline; gap: 8px; z-index: 3; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px);}
+        .hardware-core-label span { color: var(--primary); font-size: 11px; letter-spacing: 1px;}
+        
+        .command-ui-modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .ui-stat-module { background-color: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 15px; position: relative; }
+        .ui-stat-module span.label { display: block; color: var(--text-muted); font-size: 10px; text-transform: uppercase; margin-bottom: 5px;}
+        .ui-stat-module strong { font-size: 16px; color: var(--text-main); font-family: monospace; }
+
+        .history-section { background-color: var(--panel-bg-dark); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.1); flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 250px; }
+        
+        /* Botón Cerrar Sesión */
+        .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: all 0.2s; margin-top: auto; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-logout:hover { background: rgba(239, 68, 68, 0.15); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+        .history-header { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); }
+        .history-table-container { flex: 1; overflow-y: auto; }
+        .history-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .history-table th, .history-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.02); }
+        .history-table th { color: var(--text-muted); font-weight: normal; }
+        .history-table tr:hover { background: rgba(255,255,255,0.05); }
+        .badge-type { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold;}
+        .type-activation { background: rgba(247, 147, 26, 0.2); color: #f7931a; border: 1px solid rgba(247, 147, 26, 0.4);}
+        .type-withdraw { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4);}
+        .pagination-controls { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
+        .page-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: 0.2s; }
+        .page-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
+        .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        
+        /* --- PANEL DERECHO (TARJETAS PROFESIONALES) --- */
+        .right-column { display: flex; flex-direction: column; gap: 15px; padding-right: 5px; }
+        .tiers-list { padding-right: 5px;}
+        .tier-card { 
+            background: linear-gradient(145deg, rgba(15, 17, 21, 0.9), rgba(5, 7, 10, 0.95)); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 15px; 
+            cursor: pointer; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            position: relative; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5); 
+            overflow: hidden; 
+        }
+        .tier-card::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 3px; 
+            background: linear-gradient(90deg, transparent, var(--text-muted), transparent); 
+            opacity: 0.3; 
+            transition: 0.3s; 
+        }
+        .tier-card:hover:not(.active):not(.locked) { 
+            transform: translateY(-5px) scale(1.02); 
+            border-color: rgba(255,255,255,0.2); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255,0.05); 
+        }
+        .tier-card.active { 
+            border-color: var(--primary); 
+            background: linear-gradient(145deg, rgba(20, 22, 28, 0.9), var(--primary-dim)); 
+            box-shadow: 0 0 25px var(--primary-dim); 
+        }
+        .tier-card.active::before { 
+            background: linear-gradient(90deg, transparent, var(--primary), transparent); 
+            opacity: 1; 
+        }
+        .tier-card.locked { 
+            opacity: 0.6; 
+            border-style: dashed; 
+            filter: grayscale(50%); 
+        }
+        .tier-card.locked::after { 
+            content: '🔒 BLOQUEADO'; 
+            position: absolute; 
+            top: 15px; 
+            right: 15px; 
+            font-size: 10px; 
+            color: var(--text-muted); 
+            background: rgba(0,0,0,0.8); 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            border: 1px solid rgba(255,255,255,0.1); 
+        }
+        .tier-card h3 { 
+            font-size: 18px; 
+            font-weight: 900; 
+            margin-bottom: 12px; 
+            color: #fff; 
+            letter-spacing: 0.5px; 
+        }
+        .tier-card.active h3::after { 
+            content: '✓ ACTIVO'; 
+            position: absolute; 
+            right: 15px; 
+            top: 20px; 
+            font-size: 9px; 
+            padding: 4px 8px; 
+            background: var(--primary); 
+            color: #000; 
+            border-radius: 20px; 
+            font-weight: 900; 
+            letter-spacing: 1px; 
+        }
+        .tier-cost-line { 
+            color: var(--success); 
+            font-weight: 900; 
+            font-size: 22px; 
+            margin-top: 15px; 
+            border-top: 1px solid rgba(255,255,255,0.05); 
+            padding-top: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .tier-cost-btn { 
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+            border: none; 
+            padding: 6px 14px; 
+            border-radius: 8px; 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            font-weight: bold; 
+            transition: 0.3s; 
+        }
+        .tier-card:hover:not(.active):not(.locked) .tier-cost-btn { 
+            background: var(--success); 
+            color: black; 
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); 
+        }
+
+        /* --- UI DE LOGIN & REGISTER (FIREBASE) --- */
+        .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3, 4, 6, 0.95); backdrop-filter: blur(15px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .auth-card { background: rgba(10, 12, 16, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 40px; width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(247, 147, 26, 0.1); text-align: center; }
+        .auth-card h2 { color: var(--primary); margin-bottom: 20px; font-size: 24px; text-transform: uppercase; letter-spacing: 2px;}
+        .auth-input { width: 100%; padding: 15px; margin-bottom: 15px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none; font-size: 14px;}
+        .auth-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-bottom: 10px;}
+        .auth-btn:hover { background: #f59e0b; transform: translateY(-2px); }
+        
+        /* Botón Switch Login/Registro Profesional */
+        .auth-switch-wrapper { margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .auth-switch-text { font-size: 11px; color: var(--text-muted); }
+        .auth-switch-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 10px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; transition: all 0.3s; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; width: 100%; }
+        .auth-switch-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary-dim); }
+
+        /* --- SISTEMA DE REFERIDOS (AFILIADOS) --- */
+        .ref-card { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .ref-link-box { display: flex; gap: 10px; margin-top: 10px; }
+        .ref-input { flex: 1; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); color: var(--success); padding: 10px; border-radius: 6px; font-family: monospace; font-size: 12px; outline: none; }
+        .ref-btn { background: var(--primary); color: black; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase;}
+        .ref-btn:hover { background: #f59e0b; }
+        .ref-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .ref-level-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 10px; text-align: center; transition: 0.3s;}
+        .ref-level-box:hover { background: rgba(255,255,255,0.05); border-color: var(--primary); }
+        .ref-level-box span { display: block; font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
+        .ref-level-box strong { font-size: 18px; color: #fff; }
+        .ref-level-box .ref-earn { color: var(--success); font-size: 11px; margin-top: 5px; display: block; font-weight: bold;}
+        .auth-error { color: var(--danger); font-size: 12px; margin-bottom: 15px; display: none; }
+
+        /* --- MODALES Y TOAST --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 999; }
+        .payment-modal { background: var(--panel-bg-dark); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px; width: 400px; max-width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.5); min-height: 350px;}
+        .payment-modal h3 { font-size: 18px; margin-bottom: 10px; color: var(--primary); }
+        #paymentInputArea .cost-display { font-size: 24px; font-family: monospace; font-weight: bold; margin-bottom: 20px; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 25px; }
+        .btn-confirm { flex: 2; background: #166534; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;}
+        .btn-cancel { flex: 1; background: transparent; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; cursor: pointer;}
+
+        /* MODAL 2FA */
+        .tfa-modal { text-align: center; }
+        .tfa-input { width: 60%; font-size: 24px; letter-spacing: 5px; text-align: center; margin: 20px auto; padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--primary); color: white; border-radius: 8px; outline: none; }
+
+        #paymentStatusArea { display: none; text-align: center; padding: 40px 0;}
+        .payment-spinner { width: 60px; height: 60px; border: 5px solid rgba(255,255,255,0.1); border-left-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #paymentSuccessIcon { font-size: 60px; display: none; margin-bottom: 20px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        #paymentStatusText { font-size: 16px; font-weight: bold; color: var(--primary); }
+
+        #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
+        .toast { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px); color: #fff; padding: 12px 24px; border-radius: 50px; font-size: 13px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: toastEnter 0.3s forwards, toastLeave 0.3s forwards 2.7s; }
+        
+        /* SISTEMA FOMO POPUPS */
+        #fomo-container { position: fixed; bottom: 30px; left: 30px; display: flex; flex-direction: column; gap: 10px; z-index: 998; }
+        .fomo-popup { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); backdrop-filter: blur(10px); color: #fff; padding: 15px; border-radius: 12px; font-size: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideInLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, slideOutLeft 0.5s forwards 5s; }
+        .fomo-icon { font-size: 20px; }
+        @keyframes slideInLeft { from { transform: translateX(-150%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOutLeft { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-150%); opacity: 0; } }
+
+        @keyframes toastEnter { to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastLeave { to { opacity: 0; transform: translateY(-20px); } }
+
+        /* --- MANTENIMIENTO Y BLOQUEOS DE TARJETA --- */
+        .maintenance-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(3, 4, 6, 0.98); backdrop-filter: blur(20px);
+            display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; text-align: center; padding: 20px;
+        }
+        .maintenance-overlay h1 { color: var(--danger); font-size: 28px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 0 20px rgba(239, 68, 68, 0.8); }
+        .maintenance-overlay p { color: var(--text-muted); font-size: 14px; max-width: 600px; line-height: 1.6; }
+        .maintenance-spinner { width: 80px; height: 80px; border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--danger); border-radius: 50%; animation: spin 2s linear infinite; margin-bottom: 30px; }
+        
+        .tier-processing-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border-radius: 12px; z-index: 10;
+        }
+        .tier-processing-overlay .payment-spinner { width: 40px; height: 40px; margin-bottom: 15px; border-width: 3px; border-left-color: var(--warning); }
+        .tier-processing-overlay p { color: var(--warning); font-size: 11px; font-weight: bold; text-transform: uppercase; text-align: center; line-height: 1.4;}
+
+        /* --- CALCULADORA --- */
+        .calc-card { border-left: 4px solid var(--primary); }
+        
+        /* --- RULETA MODAL --- */
+        .roulette-container { position: relative; width: 240px; height: 240px; margin: 0 auto 20px auto; }
+        .roulette-wheel { 
+            width: 100%; height: 100%; border-radius: 50%; 
+            border: 8px solid rgba(255,255,255,0.1); 
+            background: conic-gradient(
+                #10b981 0deg 60deg,    /* Premio Menor */
+                #ef4444 60deg 120deg,  /* Nada */
+                #f59e0b 120deg 180deg, /* $500 */
+                #3b82f6 180deg 240deg, /* $50 */
+                #f7931a 240deg 300deg, /* $1000 */
+                #8b5cf6 300deg 360deg  /* Nada */
+            ); 
+            position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.5); 
+            overflow: hidden;
+        }
+        .roulette-wheel::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(0deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%),
+                              linear-gradient(60deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%),
+                              linear-gradient(120deg, transparent 49.5%, rgba(0,0,0,0.5) 49.5%, rgba(0,0,0,0.5) 50.5%, transparent 50.5%);
+            border-radius: 50%; pointer-events: none;
+        }
+        .roulette-marker { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid white; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); z-index: 10; }
+        .roulette-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: radial-gradient(circle, #333 0%, #000 100%); border-radius: 50%; border: 4px solid var(--primary); box-shadow: 0 0 15px var(--primary); z-index: 5; display: flex; align-items: center; justify-content: center; font-size: 20px;}
+        .r-label { position: absolute; font-size: 11px; font-weight: bold; color: white; text-shadow: 1px 1px 2px black; z-index: 4; }
+        .l-win { top: 20px; left: 130px; transform: rotate(30deg); }
+        .l-lose1 { top: 100px; right: 10px; transform: rotate(90deg); }
+        .l-big1 { bottom: 20px; right: 50px; transform: rotate(150deg); }
+        .l-mid { bottom: 20px; left: 50px; transform: rotate(210deg); }
+        .l-big2 { top: 100px; left: 10px; transform: rotate(270deg); }
+        .l-lose2 { top: 20px; left: 40px; transform: rotate(330deg); }
+        
+        /* --- TICKER SOCIAL --- */
+        .social-ticker { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 20px; font-size: 11px; color: var(--text-muted); z-index: 900; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .ticker-text { color: var(--success); font-weight: bold; animation: fadeInOut 8s infinite; }
+        @keyframes fadeInOut { 0% { opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* --- LLUVIA DE BILLETES --- */
+        #moneyRainContainer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 10000; display: none; overflow: hidden; }
+        .money-drop { position: absolute; top: -50px; font-size: 35px; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        /* --- TÉRMINOS Y CONDICIONES --- */
+        .tc-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10001; }
+        .tc-modal { background: #05070a; border: 1px solid var(--danger); border-radius: 12px; padding: 30px; width: 650px; max-width: 95%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(239, 68, 68, 0.4); }
+        .tc-modal h3 { color: var(--danger); margin-bottom: 15px; font-size: 16px; text-transform: uppercase; text-align: center; letter-spacing: 2px; }
+        .tc-content { flex: 1; overflow-y: auto; color: #94a3b8; font-size: 10px; line-height: 1.6; text-align: justify; padding-right: 15px; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: 15px; padding-bottom: 15px; margin-bottom: 15px; }
+        .tc-content strong { color: #e2e8f0; font-size: 11px; }
+        .tc-checkbox-container { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 10px; color: var(--text-muted); text-align: left; }
+        .tc-checkbox-container input[type="checkbox"] { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
+        .tc-link { color: var(--danger); text-decoration: underline; cursor: pointer; font-weight: bold; }
+    </style>
 </head>
 <body>
+
     <!-- OVERLAY DE REGISTRO E INICIO DE SESIÓN -->
     <div class="auth-overlay" id="authOverlay">
         <canvas id="coinsCanvasAuth" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:-1; opacity:0.85;"></canvas>
@@ -71,11 +723,13 @@
         </div>
     </div>
 
+    <!-- Canvas Principal -->
     <canvas id="matrixCanvas"></canvas>
 
-    <!-- MODAL GENERAL (Usado para Pagos, 2FA, Ads) -->
+    <!-- MODAL GENERAL (Pagos, 2FA, Ads) -->
     <div class="modal-overlay" id="paymentOverlay">
         <div class="payment-modal">
+            
             <div id="paymentInputArea">
                 <h3 id="modalPlanName">Desbloquear Plan</h3>
                 <div class="cost-display">Monto: $<span id="modalPlanCost">0</span> USD</div>
@@ -126,7 +780,7 @@
     <div id="toast-container"></div>
     <div id="fomo-container"></div>
     
-    <!-- PANTALLA DE MANTENIMIENTO -->
+    <!-- PANTALLA DE MANTENIMIENTO DEL ADMINISTRADOR -->
     <div class="maintenance-overlay" id="maintenanceOverlay">
         <div class="maintenance-spinner"></div>
         <h1>SISTEMA EN MANTENIMIENTO</h1>
@@ -210,6 +864,7 @@
     </div>
 
     <div class="dashboard" style="padding-bottom: 40px;">
+        
         <!-- PANEL IZQUIERDO -->
         <div class="card balance-card">
             <div class="panel-header"><h2>Comandos de Cartera</h2></div>
@@ -413,7 +1068,1060 @@
         </div>
     </div>
 
-    <!-- CONEXIÓN A TU JAVASCRIPT -->
-    <script src="app.js"></script>
+    <!-- JAVASCRIPT INTEGRADO -->
+    <script>
+        // ==========================================
+        // CONFIGURACIÓN DE FIREBASE
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0F4nt2vcSSqMeVytcTLPXyo33K9VLgjQ",
+            authDomain: "mineriabtc-b1c78.firebaseapp.com",
+            databaseURL: "https://mineriabtc-b1c78-default-rtdb.firebaseio.com",
+            projectId: "mineriabtc-b1c78",
+            storageBucket: "mineriabtc-b1c78.firebasestorage.app",
+            messagingSenderId: "622802944773",
+            appId: "1:622802944773:web:242b0036a77f93d3c22d6c"
+        };
+        
+        let isFirebaseActive = false;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            isFirebaseActive = true;
+            console.log("Firebase Conectado.");
+        } catch(e) {
+            console.warn("Firebase no configurado. Operando en modo LocalStorage temporalmente.");
+        }
+
+        // ==========================================
+        // ESTADO GLOBAL Y CONFIGURACIONES
+        // ==========================================
+        let user = null;
+        let selectedTierForPayment = null;
+        let currentHistoryPage = 1;
+        const itemsPerPage = 10;
+        let withdrawAmountTemp = 0;
+
+        const cryptoData = { 
+            'BTC': { price: 69150, symbol: 'BTC', multiplier: 1, wdMultiplier: 1 }, 
+            'LTC': { price: 85.50, symbol: 'LTC', multiplier: 800, wdMultiplier: 4 }, 
+            'DASH': { price: 32.10, symbol: 'DASH', multiplier: 2150, wdMultiplier: 8 } 
+        };
+        const paymentWallets = { 
+            'USDT': 'TNCFjTLYp63k2ocAooAnTUJbodaWLrRQhh', 
+            'BTC': '1GXrmr4teSrfGTp294YjG11Zk6q7zDLrtv', 
+            'ETH': '0x02a8f8567e2a3ed68b51de71d25f23a27bb7cb7f' 
+        };
+
+        function getMinWithdrawUSD(tierId, coinSymbol) {
+            const t = tiers.find(x => x.id === tierId) || tiers[0];
+            const multiplier = cryptoData[coinSymbol] ? cryptoData[coinSymbol].wdMultiplier : 1;
+            return t.minWithdrawUSD * multiplier;
+        }
+
+        const tiers = [
+            { id: 1, name: "Básico Sim Rig", hashrate: "15.0 TH/s", baseBtcPerSec: 0.000000000008, costUSD: 0, minWithdrawUSD: 10, needleRange: [0, 40], playbackSpeed: 1, gasFee: 0.15, specs: "Minado gratuito y constante. Retiro a largo plazo." },
+            { id: 2, name: "ProMiner X", hashrate: "90.0 TH/s", baseBtcPerSec: 0.000000000083, costUSD: 10, minWithdrawUSD: 25, needleRange: [45, 80], videoSrc: "planprominerX.mp4", playbackSpeed: 1.5, gasFee: 0.10, specs: "ROI: 20 días | X2 en 30 días | X3 en 40 días" },
+            { id: 3, name: "AntCluster 1200", hashrate: "280 TH/s", baseBtcPerSec: 0.000000000167, costUSD: 20, minWithdrawUSD: 50, needleRange: [85, 130], videoSrc: "planantcluster.mp4", playbackSpeed: 2.5, gasFee: 0.05, specs: "ROI: 20 días | Alta eficiencia energética y rentabilidad" },
+            { id: 4, name: "Quantum H-Core", hashrate: "1500 TH/s", baseBtcPerSec: 0.000000000293, costUSD: 35, minWithdrawUSD: 87.5, needleRange: [135, 180], videoSrc: "plancuantun.mp4", playbackSpeed: 4.0, gasFee: 0.00, specs: "ROI: 20 días | Fuerza bruta cuántica con 0% Gas Fee" }
+        ];
+
+        function showToast(message) { 
+            const c = document.getElementById('toast-container'); 
+            const t = document.createElement('div'); 
+            t.className = 'toast'; 
+            t.innerHTML = message; 
+            c.appendChild(t); 
+            setTimeout(() => t.remove(), 4000); 
+        }
+
+        // ==========================================
+        // FUNCIONES DE INICIALIZACIÓN Y RENDERIZADO
+        // ==========================================
+        function initApp() {
+            updateWithdrawNetworks();
+            
+            if(user && user.savedWallet) {
+                const wdSelect = document.getElementById('wdNetworkSelect');
+                if([...wdSelect.options].some(opt => opt.value === user.savedWallet.network)) {
+                    wdSelect.value = user.savedWallet.network;
+                }
+                document.getElementById('wdWalletAddress').value = user.savedWallet.address;
+            }
+            
+            if(user) {
+                changeCoin(user.activeCoin || 'BTC'); 
+                activateTier(user.tierId || 1); 
+                startMiningLoop();
+                if(typeof renderHistory === 'function') renderHistory();
+            }
+            startFomoSystem();
+
+            if (isFirebaseActive && firebase.auth().currentUser) {
+                const uid = firebase.auth().currentUser.uid;
+                
+                firebase.database().ref('settings/maintenance').on('value', snap => {
+                    const isOffline = snap.val();
+                    const overlay = document.getElementById('maintenanceOverlay');
+                    if(overlay) overlay.style.display = isOffline ? 'flex' : 'none';
+                });
+
+                firebase.database().ref('users/' + uid).on('value', snap => {
+                    if(!snap.exists()) {
+                        firebase.auth().signOut().then(() => {
+                            alert("ACCESO DENEGADO.\nSu cuenta ha sido eliminada por el administrador.");
+                            window.location.reload();
+                        });
+                    } else {
+                        const dbUser = snap.val();
+                        
+                        if(user.pendingTiers && user.pendingTiers.length > 0) {
+                            if(dbUser.unlockedTiers) {
+                                user.pendingTiers.forEach(pendingTierId => {
+                                    if(dbUser.unlockedTiers.includes(pendingTierId)) {
+                                        showToast(`🎉 <b>¡Minero Aprobado!</b><br>Su pago fue verificado y el minero se ha activado automáticamente.`);
+                                        user.pendingTiers = user.pendingTiers.filter(id => id !== pendingTierId); 
+                                        activateTier(pendingTierId);
+                                    }
+                                });
+                            }
+                        }
+
+                        if(dbUser.adminBonus !== undefined && dbUser.adminBonus !== null) {
+                            user.balances[user.activeCoin] += dbUser.adminBonus;
+                            if(user.balances[user.activeCoin] < 0) user.balances[user.activeCoin] = 0; 
+                            
+                            const esSuma = dbUser.adminBonus > 0;
+                            showToast(esSuma ? `💰 <b>Bono Acreditado</b><br>El sistema ha inyectado saldo a tu cuenta.` : `⚠️ <b>Ajuste de Saldo</b><br>Se ha realizado una deducción administrativa en tu cuenta.`);
+                            
+                            firebase.database().ref('users/' + uid + '/adminBonus').remove();
+                        }
+
+                        user.unlockedTiers = dbUser.unlockedTiers || [1];
+                        user.tierId = dbUser.tierId || 1;
+                        renderTiers();
+                    }
+                });
+            }
+        }
+
+        function renderTiers() {
+            const container = document.getElementById('tiersContainer');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            if (!user || !user.unlockedTiers) return;
+            if(!user.pendingTiers) user.pendingTiers = [];
+
+            tiers.forEach(tier => {
+                const isCurrent = user.tierId === tier.id;
+                const isUnlocked = user.unlockedTiers.includes(tier.id);
+                const isPending = user.pendingTiers.includes(tier.id);
+
+                const card = document.createElement('div');
+                card.className = `tier-card ${isCurrent ? 'active' : ''} ${(!isUnlocked && !isCurrent && !isPending) ? 'locked' : ''}`;
+                
+                if(!isCurrent && !isPending) { 
+                    card.onclick = () => isUnlocked ? activateTier(tier.id) : openPaymentModal(tier.id); 
+                }
+
+                const currentMinWd = getMinWithdrawUSD(tier.id, user ? user.activeCoin : 'BTC');
+                
+                let pendingOverlayHtml = '';
+                if(isPending) {
+                    pendingOverlayHtml = `
+                        <div class="tier-processing-overlay">
+                            <div class="payment-spinner"></div>
+                            <p>Procesando<br>Transacción...</p>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    ${pendingOverlayHtml}
+                    <h3>${tier.name}</h3>
+                    <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px; display: flex; justify-content: space-between;">
+                        <span>Retiro Mín: <b style="color:white;">$${currentMinWd.toFixed(2)}</b></span>
+                        <span style="color:var(--danger); font-weight:bold;">Gas Fee: ${(tier.gasFee * 100)}%</span>
+                    </div>
+                    <div class="tier-stats" style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.02); margin-bottom: 10px;">
+                        <p style="font-size:12px; color:var(--text-main); margin-bottom: 6px;">Poder de Hash: <strong style="color:var(--primary); font-size: 14px;">${tier.hashrate}</strong></p>
+                        <p style="font-size:10px; color:#3b82f6; font-style: italic; line-height: 1.4;">${tier.specs}</p>
+                    </div>
+                    <div class="tier-cost-line">
+                        $${tier.costUSD.toLocaleString()} USD
+                        ${!isCurrent && !isPending ? '<button class="tier-cost-btn">Adquirir</button>' : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function activateTier(tierId) {
+            if(!user) return;
+            user.tierId = tierId;
+            const newTier = tiers.find(t => t.id === tierId);
+            if(!newTier) return;
+
+            document.body.setAttribute('data-tier', tierId);
+            
+            const minerVideo = document.getElementById('minerVideo');
+            const basicCard = document.getElementById('basicPlanCard');
+            const videoMsg = document.getElementById('videoErrorMsg');
+
+            if(minerVideo && basicCard) {
+                if (tierId === 1) {
+                    minerVideo.style.display = 'none'; 
+                    if(videoMsg) videoMsg.style.display = 'none'; 
+                    basicCard.style.display = 'block';
+                } else {
+                    basicCard.style.display = 'none';
+                    minerVideo.style.display = 'block';
+                    if (minerVideo.getAttribute('src') !== newTier.videoSrc) {
+                        minerVideo.setAttribute('src', newTier.videoSrc); 
+                        minerVideo.load();
+                        minerVideo.play().then(() => { minerVideo.playbackRate = newTier.playbackSpeed; }).catch(e => console.log("Auto-play prevenido."));
+                    } else { 
+                        minerVideo.playbackRate = newTier.playbackSpeed; 
+                    }
+                }
+            }
+            
+            const hashDisplay = document.getElementById('hashrateDisplay');
+            const rateDisplay = document.getElementById('rateDisplay');
+            const activePlan = document.getElementById('activePlanDisplay');
+            const gasFeeDisp = document.getElementById('gasFeeDisplay');
+
+            if(hashDisplay) hashDisplay.innerText = newTier.hashrate;
+            if(rateDisplay && user.activeCoin && cryptoData[user.activeCoin]) rateDisplay.innerText = `${(newTier.baseBtcPerSec * cryptoData[user.activeCoin].multiplier).toFixed(10)} ${user.activeCoin}/s`;
+            if(activePlan) activePlan.innerHTML = `Rig: <span style="color:var(--primary)">${newTier.name}</span>`;
+            if(gasFeeDisp) gasFeeDisp.innerText = `Comisión de Red (Gas Fee): ${(newTier.gasFee * 100)}%`;
+            
+            renderTiers(); 
+        }
+
+        function logoutUser() {
+            if(isFirebaseActive) {
+                firebase.auth().signOut().then(() => {
+                    window.location.reload(); 
+                });
+            } else {
+                window.location.reload();
+            }
+        }
+
+        // --- SISTEMA DE LOGIN Y REGISTRO ---
+        let isLoginMode = true;
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            const btn = document.getElementById('authActionButton');
+            const promptTxt = document.getElementById('authSwitchPrompt');
+            const switchBtn = document.getElementById('authSwitchBtn');
+            const title = document.getElementById('authTitle');
+            const regFields = document.querySelectorAll('.register-only');
+            const errorMsg = document.getElementById('authErrorMsg');
+            const tcContainer = document.getElementById('tcContainer');
+            
+            errorMsg.style.display = "none";
+            
+            if(isLoginMode) {
+                title.innerText = "WIN-MINER-PRO";
+                btn.innerText = "Iniciar Sesión";
+                if(promptTxt) promptTxt.innerText = "¿Aún no tienes una cuenta de inversor?";
+                if(switchBtn) switchBtn.innerText = "Crear Cuenta Ahora ➔";
+                regFields.forEach(f => f.style.display = 'none');
+                if(tcContainer) tcContainer.style.display = 'none';
+            } else {
+                title.innerText = "Registro de Inversor";
+                btn.innerText = "Registrar";
+                if(promptTxt) promptTxt.innerText = "¿Ya posees una cuenta registrada?";
+                if(switchBtn) switchBtn.innerText = "Iniciar Sesión ➔";
+                regFields.forEach(f => f.style.display = 'block');
+                if(tcContainer) tcContainer.style.display = 'flex';
+            }
+        }
+
+        function loginUser() {
+            const email = document.getElementById('authEmail').value;
+            const pass = document.getElementById('authPassword').value;
+            
+            const name = document.getElementById('authName') ? document.getElementById('authName').value : "";
+            const lastName = document.getElementById('authLastName') ? document.getElementById('authLastName').value : "";
+            const dni = document.getElementById('authDni') ? document.getElementById('authDni').value : "";
+            const phone = document.getElementById('authPhone') ? document.getElementById('authPhone').value : "";
+            const tcCheckbox = document.getElementById('tcCheckbox');
+            
+            const errorMsg = document.getElementById('authErrorMsg');
+            const spinner = document.getElementById('authSpinner');
+            
+            errorMsg.style.display = "none";
+
+            if(!isLoginMode && tcCheckbox && !tcCheckbox.checked) {
+                errorMsg.innerText = "ATENCIÓN: Es obligatorio leer y aceptar los Términos y Condiciones Legales para operar.";
+                errorMsg.style.display = "block";
+                return;
+            }
+            
+            if(email.length < 5 || pass.length < 6 || (!isLoginMode && (name.length < 2 || lastName.length < 2 || dni.length < 5 || phone.length < 6))) {
+                errorMsg.innerText = "Por favor, llene todos los campos requeridos con información verídica y verificable (KYC).";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            document.querySelectorAll('.auth-input').forEach(el => el.style.display = 'none');
+            document.getElementById('authActionButton').style.display = 'none';
+            document.querySelector('.auth-switch').style.display = 'none';
+            if(document.getElementById('tcContainer')) document.getElementById('tcContainer').style.display = 'none';
+            
+            document.getElementById('verificationBlock').style.display = 'flex';
+            document.getElementById('verifStatusTitle').innerText = "ENCRIPTANDO...";
+            document.getElementById('verifStatusDesc').innerText = "Estableciendo conexión cifrada con el servidor.";
+
+            if(isFirebaseActive) {
+                if(isLoginMode) {
+                    firebase.auth().signInWithEmailAndPassword(email, pass)
+                        .then((userCredential) => { loadUserData(userCredential.user.uid, email); })
+                        .catch((error) => { 
+                            document.querySelectorAll('.auth-input').forEach(el => {
+                                if (isLoginMode && el.classList.contains('register-only')) return;
+                                el.style.display = 'block';
+                            });
+                            document.getElementById('authActionButton').style.display = 'block';
+                            document.querySelector('.auth-switch').style.display = 'block';
+                            document.getElementById('verificationBlock').style.display = 'none';
+                            
+                            if(spinner) spinner.style.display = "none"; 
+                            errorMsg.innerText = error.message; 
+                            errorMsg.style.display = "block"; 
+                        });
+                } else {
+                    firebase.auth().createUserWithEmailAndPassword(email, pass)
+                        .then((userCredential) => { 
+                            const userIdNum = Math.floor(Math.random() * 900000) + 100000;
+                            const newId = `ID-${userIdNum}`;
+                            loadUserData(userCredential.user.uid, email, name, lastName, newId, dni, phone); 
+                        })
+                        .catch((error) => { 
+                            document.querySelectorAll('.auth-input').forEach(el => el.style.display = 'block');
+                            document.getElementById('authActionButton').style.display = 'block';
+                            document.querySelector('.auth-switch').style.display = 'block';
+                            document.getElementById('tcContainer').style.display = 'flex';
+                            document.getElementById('verificationBlock').style.display = 'none';
+
+                            if(spinner) spinner.style.display = "none"; 
+                            errorMsg.innerText = error.message; 
+                            errorMsg.style.display = "block"; 
+                        });
+                }
+            } else {
+                if(spinner) spinner.style.display = "none";
+                document.getElementById('authOverlay').style.display = "none";
+                initApp();
+            }
+        }
+
+        function loadUserData(uid, email, name = "", lastName = "", newId = null, dni = "", phone = "") {
+            const spinner = document.getElementById('authSpinner');
+            const errorMsg = document.getElementById('authErrorMsg');
+            
+            firebase.database().ref('users/' + uid).once('value').then((snapshot) => {
+                if(snapshot.exists()) {
+                    user = snapshot.val();
+                    if(!user.unlockedTiers) user.unlockedTiers = [1];
+                    if(!user.systemHistory) user.systemHistory = [];
+                    if(!user.balances) user.balances = { BTC: 0, LTC: 0, DASH: 0 };
+                    if(!user.activeCoin) user.activeCoin = 'BTC';
+                    if(user.minerCondition === undefined) user.minerCondition = 100;
+                    if(user.bonusHashrate === undefined) user.bonusHashrate = 0;
+                    if(user.lastSpinDate === undefined) user.lastSpinDate = 0;
+                    if(user.referrals === undefined) user.referrals = { lvl1: 0, lvl2: 0, lvl3: 0, earn1: 0, earn2: 0, earn3: 0 };
+                } else {
+                    user = {
+                        email: email,
+                        nombre: name,
+                        apellido: lastName,
+                        dni: dni,
+                        telefono: phone,
+                        idUsuario: newId,
+                        status: 'pending', 
+                        balances: { BTC: 0, LTC: 0, DASH: 0 },
+                        tierId: 1,
+                        unlockedTiers: [1],
+                        activeCoin: 'BTC',
+                        systemHistory: [],
+                        savedWallet: null,
+                        boostUntil: 0,
+                        minerCondition: 100,
+                        bonusHashrate: 0,
+                        lastSpinDate: 0,
+                        referrals: { lvl1: 0, lvl2: 0, lvl3: 0, earn1: 0, earn2: 0, earn3: 0 }
+                    };
+                    firebase.database().ref('users/' + uid).set(user);
+                }
+                
+                if(user.status === 'pending') {
+                    document.getElementById('authTitle').style.display = 'none';
+                    document.getElementById('authSubtitle').style.display = 'none';
+                    document.querySelectorAll('.auth-input').forEach(f => f.style.display = 'none');
+                    document.getElementById('authActionButton').style.display = 'none';
+                    document.querySelector('.auth-switch').style.display = 'none';
+                    const tcCont = document.getElementById('tcContainer');
+                    if(tcCont) tcCont.style.display = 'none';
+                    
+                    document.getElementById('verificationBlock').style.display = 'flex';
+                    const vTitle = document.getElementById('verifStatusTitle');
+                    const vDesc = document.getElementById('verifStatusDesc');
+                    
+                    vTitle.innerText = "ESPERANDO APROBACIÓN ROOT";
+                    vDesc.innerHTML = "Su identidad está siendo verificada por el Administrador.<br><br><span style='color:var(--warning); font-size:11px; font-weight:bold;'>BLOQUEO DE SEGURIDAD ACTIVADO.<br>NO CIERRE ESTA PESTAÑA.</span>";
+                    
+                    firebase.database().ref('users/' + uid + '/status').on('value', (statusSnap) => {
+                        const currentStatus = statusSnap.val();
+                        if(currentStatus === 'approved') {
+                            user.status = 'approved';
+                            vTitle.innerText = "ACCESO CONCEDIDO";
+                            vDesc.innerText = "Sincronizando panel de minería...";
+                            firebase.database().ref('users/' + uid + '/status').off();
+                            
+                            setTimeout(() => {
+                                document.getElementById('authOverlay').style.display = "none";
+                                if(typeof initApp === "function") initApp();
+                            }, 1500);
+                            
+                        } else if(currentStatus === 'rejected') {
+                            vTitle.innerText = "ACCESO DENEGADO";
+                            vTitle.style.color = "var(--danger)";
+                            vTitle.style.textShadow = "0 0 15px rgba(239, 68, 68, 0.6)";
+                            vDesc.innerHTML = "El administrador ha rechazado permanentemente su solicitud de ingreso por inconsistencia de datos KYC.";
+                            
+                            document.getElementById('tsRing1').style.animation = 'none';
+                            document.getElementById('tsRing1').style.borderColor = 'transparent transparent var(--danger) var(--danger)';
+                            document.getElementById('tsRing2').style.animation = 'none';
+                            document.getElementById('tsCore').style.background = 'var(--danger)';
+                            document.getElementById('tsCore').style.boxShadow = '0 0 30px var(--danger)';
+                            document.getElementById('tsCore').innerText = '✖';
+                            
+                        } else if(currentStatus === null) {
+                            vTitle.innerText = "CUENTA ELIMINADA";
+                            vTitle.style.color = "var(--danger)";
+                            vDesc.innerHTML = "Su registro fue borrado de la base de datos por violar los Términos y Condiciones.";
+                            document.getElementById('tsRing1').style.animation = 'none';
+                            document.getElementById('tsRing2').style.animation = 'none';
+                            document.getElementById('tsCore').style.background = '#333';
+                            document.getElementById('tsCore').style.boxShadow = 'none';
+                        }
+                    });
+                } else if(user.status === 'rejected') {
+                    document.getElementById('authTitle').style.display = 'none';
+                    document.getElementById('authSubtitle').style.display = 'none';
+                    document.querySelectorAll('.auth-input').forEach(f => f.style.display = 'none');
+                    document.getElementById('authActionButton').style.display = 'none';
+                    document.querySelector('.auth-switch').style.display = 'none';
+                    const tcCont = document.getElementById('tcContainer');
+                    if(tcCont) tcCont.style.display = 'none';
+                    
+                    document.getElementById('verificationBlock').style.display = 'flex';
+                    document.getElementById('verifStatusTitle').innerText = "ACCESO DENEGADO";
+                    document.getElementById('verifStatusTitle').style.color = "var(--danger)";
+                    document.getElementById('verifStatusDesc').innerText = "Su cuenta se encuentra bloqueada por el servidor Root tras fallar la validación KYC.";
+                    
+                    document.getElementById('tsRing1').style.animation = 'none';
+                    document.getElementById('tsRing2').style.animation = 'none';
+                    document.getElementById('tsCore').style.background = 'var(--danger)';
+                    document.getElementById('tsCore').innerText = '✖';
+                } else {
+                    document.getElementById('authOverlay').style.display = "none";
+                    if(typeof initApp === "function") initApp();
+                }
+            }).catch((error) => {
+                if(spinner) spinner.style.display = 'none';
+                errorMsg.innerText = "Error cargando Base de Datos: " + error.message;
+                errorMsg.style.display = "block";
+            });
+        }
+
+        function saveProgress() { 
+            if(isFirebaseActive && firebase.auth().currentUser && user) {
+                firebase.database().ref('users/' + firebase.auth().currentUser.uid).set(user);
+            }
+        }
+
+        function changeCoin(coinSymbol) {
+            if(!user || !cryptoData[coinSymbol]) return;
+            user.activeCoin = coinSymbol;
+            document.querySelectorAll('.crypto-btn').forEach(btn => btn.classList.remove('active'));
+            const btn = document.getElementById(`btn-${coinSymbol}`);
+            if(btn) btn.classList.add('active');
+            
+            document.getElementById('balanceLabel').innerText = `Saldo Minado (${coinSymbol})`;
+            
+            const cardFront = document.querySelector('#basicPlanCard .card-front');
+            if(cardFront) cardFront.innerText = coinSymbol === 'BTC' ? '₿' : (coinSymbol === 'LTC' ? 'Ł' : 'D');
+            
+            updateWithdrawNetworks();
+            
+            const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
+            document.getElementById('rateDisplay').innerText = `${(currentTier.baseBtcPerSec * cryptoData[coinSymbol].multiplier).toFixed(10)} ${coinSymbol}/s`;
+            saveProgress();
+            renderTiers(); 
+        }
+
+        const wdNetworks = { 'BTC': ['Bitcoin Network (BTC)', 'BEP20 (BSC)'], 'LTC': ['Litecoin Network', 'BEP20 (BSC)'], 'DASH': ['Dash Network'], 'USDT': ['TRC20 (Tron)', 'ERC20 (Ethereum)', 'BEP20 (BSC)', 'Polygon'] };
+
+        function updateWithdrawNetworks() {
+            if(!user) return;
+            const crypto = user.activeCoin;
+            const netSelect = document.getElementById('wdNetworkSelect');
+            if(!netSelect) return;
+            netSelect.innerHTML = '';
+            const networks = wdNetworks[crypto] || wdNetworks['USDT'];
+            networks.forEach(net => { 
+                const opt = document.createElement('option'); 
+                opt.value = net; 
+                opt.innerText = net; 
+                netSelect.appendChild(opt); 
+            });
+        }
+
+        function saveWithdrawMethod() {
+            if(!user) return;
+            const address = document.getElementById('wdWalletAddress').value.trim();
+            if(address.length < 15) { showToast('⚠️ Ingrese una dirección de billetera válida.'); return; }
+            user.savedWallet = { crypto: user.activeCoin, network: document.getElementById('wdNetworkSelect').value, address: address };
+            saveProgress(); 
+            showToast('✅ Billetera guardada exitosamente.');
+        }
+
+        function openPaymentModal(tierId) {
+            selectedTierForPayment = tiers.find(t => t.id === tierId);
+            if(!selectedTierForPayment) return;
+            document.getElementById('modalPlanName').innerText = `Desbloquear ${selectedTierForPayment.name}`;
+            document.getElementById('modalPlanCost').innerText = selectedTierForPayment.costUSD.toLocaleString();
+            
+            document.getElementById('paymentStatusArea').style.display = 'none';
+            document.getElementById('tfaArea').style.display = 'none';
+            document.getElementById('adArea').style.display = 'none';
+            
+            document.getElementById('paymentInputArea').style.display = 'block';
+            document.getElementById('paymentOverlay').style.display = 'flex';
+            updateWalletAddressModal();
+        }
+
+        function closeModal() { document.getElementById('paymentOverlay').style.display = 'none'; selectedTierForPayment = null; }
+
+        function updateWalletAddressModal() { 
+            const select = document.getElementById('cryptoNetworkSelect');
+            const display = document.getElementById('walletAddressDisplayModal');
+            if(select && display) display.value = paymentWallets[select.value] || ""; 
+        }
+
+        function processPayment() {
+            document.getElementById('paymentInputArea').style.display = 'none';
+            document.getElementById('paymentStatusArea').style.display = 'block';
+            
+            const spinner = document.getElementById('paymentSpinner');
+            const successIcon = document.getElementById('paymentSuccessIcon');
+            const statusText = document.getElementById('paymentStatusText');
+            
+            spinner.style.display = 'block'; successIcon.style.display = 'none';
+            statusText.innerHTML = `Registrando transacción en la Red...<br><span style="font-size:24px; color:#fff">$${selectedTierForPayment.costUSD.toLocaleString()} USD</span>`;
+            statusText.style.color = 'var(--primary)';
+
+            setTimeout(() => {
+                if(!user.systemHistory) user.systemHistory = [];
+                if(!user.pendingTiers) user.pendingTiers = [];
+
+                user.pendingTiers.push(selectedTierForPayment.id);
+
+                user.systemHistory.push({ 
+                    type: 'deposit_pending', 
+                    detail: `Verificación pendiente: Compra de ${selectedTierForPayment.name}`, 
+                    planName: selectedTierForPayment.name,
+                    amount: selectedTierForPayment.costUSD.toFixed(2), 
+                    date: new Date().toLocaleString(),
+                    requestedTierId: selectedTierForPayment.id
+                });
+                
+                saveProgress(); 
+                if(typeof renderHistory === 'function') renderHistory();
+                renderTiers(); 
+                closeModal(); 
+                showToast('⏳ <b>Pago en Revisión</b><br>Su nuevo minero se activará automáticamente al ser verificado por el administrador.');
+            }, 5000);
+        }
+
+        function renderHistory() {
+            const tbody = document.getElementById('historyTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            if(!user || !user.systemHistory || user.systemHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No hay transacciones recientes</td></tr>';
+                document.getElementById('totalRecordsLabel').innerText = "0 Registros";
+                return;
+            }
+            
+            const historyReversed = [...user.systemHistory].reverse();
+            document.getElementById('totalRecordsLabel').innerText = `${historyReversed.length} Registros`;
+            
+            const totalPages = Math.ceil(historyReversed.length / itemsPerPage) || 1;
+            if(currentHistoryPage > totalPages) currentHistoryPage = totalPages;
+            if(currentHistoryPage < 1) currentHistoryPage = 1;
+            
+            document.getElementById('pageIndicator').innerText = `Página ${currentHistoryPage} de ${totalPages}`;
+            document.getElementById('btnPrevPage').disabled = currentHistoryPage === 1;
+            document.getElementById('btnNextPage').disabled = currentHistoryPage === totalPages;
+            
+            const startIdx = (currentHistoryPage - 1) * itemsPerPage;
+            const pageItems = historyReversed.slice(startIdx, startIdx + itemsPerPage);
+            
+            pageItems.forEach(item => {
+                let typeBadge = '';
+                if(item.type === 'deposit_pending') typeBadge = '<span class="badge-type" style="background:rgba(245, 158, 11, 0.2); color:#f59e0b; border:1px solid rgba(245, 158, 11, 0.4);">En Revisión</span>';
+                else if(item.type === 'activation') typeBadge = '<span class="badge-type type-activation">Upgrade</span>';
+                else if(item.type === 'withdraw') typeBadge = '<span class="badge-type type-withdraw">Retiro</span>';
+                else typeBadge = `<span class="badge-type" style="background:rgba(255,255,255,0.1); color:white;">${item.type}</span>`;
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${typeBadge}</td>
+                        <td>${item.detail || item.planName}</td>
+                        <td style="color:var(--success); font-weight:bold;">$${item.amount}</td>
+                        <td style="color:var(--text-muted);">${item.date}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function changePage(dir) {
+            currentHistoryPage += dir;
+            renderHistory();
+        }
+
+        function watchAdForBoost() {
+            if(!user) return;
+            
+            window.open('https://www.effectivecpmnetwork.com/cdm2stes5?key=dd299ad126427e65e882db7d35341c99', '_blank');
+
+            document.getElementById('paymentInputArea').style.display = 'none';
+            document.getElementById('paymentStatusArea').style.display = 'none';
+            document.getElementById('tfaArea').style.display = 'none';
+            
+            document.getElementById('adArea').style.display = 'block';
+            document.getElementById('paymentOverlay').style.display = 'flex';
+            
+            let timeLeft = 15; 
+            const timerText = document.getElementById('adTimerText');
+            if(timerText) timerText.innerText = timeLeft;
+            
+            const adInterval = setInterval(() => {
+                timeLeft--;
+                if(timerText) timerText.innerText = timeLeft;
+                if(timeLeft <= 0) {
+                    clearInterval(adInterval);
+                    user.boostUntil = Date.now() + (10 * 60 * 1000); 
+                    saveProgress();
+                    closeModal();
+                    showToast('🚀 <b>Sobrecarga Exitosa</b><br>Se ha inyectado +1.05 TH/s a su rig durante 10 minutos.');
+                }
+            }, 1000);
+        }
+
+        function initiateWithdraw() {
+            if(!user) return;
+            if(!user.savedWallet || !user.savedWallet.address) {
+                showToast('⚠️ Configure y guarde su Método de Retiro primero.');
+                return;
+            }
+            const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
+            const currentUSD = user.balances[user.activeCoin] * cryptoData[user.activeCoin].price;
+            
+            const targetUSD = getMinWithdrawUSD(user.tierId, user.activeCoin);
+
+            if(currentUSD < targetUSD) {
+                showToast(`⚠️ <b>Saldo Insuficiente</b><br>El mínimo de retiro en ${user.activeCoin} es de $${targetUSD.toFixed(2)} USD.`);
+                return;
+            }
+
+            withdrawAmountTemp = currentUSD - (currentUSD * currentTier.gasFee);
+
+            document.getElementById('paymentInputArea').style.display = 'none';
+            document.getElementById('paymentStatusArea').style.display = 'none';
+            document.getElementById('adArea').style.display = 'none';
+            
+            document.getElementById('tfaArea').style.display = 'block';
+            const tfaInp = document.getElementById('tfaCode');
+            if(tfaInp) tfaInp.value = '';
+            document.getElementById('paymentOverlay').style.display = 'flex';
+        }
+
+        function verify2FA() {
+            const code = document.getElementById('tfaCode').value;
+            if(code.length !== 6) {
+                showToast("⚠️ Ingrese un código de seguridad válido de 6 dígitos.");
+                return;
+            }
+
+            if(!user.systemHistory) user.systemHistory = [];
+            user.balances[user.activeCoin] = 0; 
+            
+            user.systemHistory.push({
+                type: 'withdraw',
+                detail: `Retiro (${user.savedWallet.network}) a ...${user.savedWallet.address.slice(-5)}`,
+                amount: withdrawAmountTemp.toFixed(2),
+                date: new Date().toLocaleString()
+            });
+
+            saveProgress();
+            closeModal();
+            triggerMoneyRain(); 
+            showToast(`✅ <b>Retiro Autorizado (2FA)</b><br>Se han enviado $${withdrawAmountTemp.toFixed(2)} USD a su billetera.`);
+        }
+
+        function turnOnMiner() {
+            if(!user) return;
+            user.isMinerRunning = true;
+            document.getElementById('minerActivationOverlay').style.display = 'none';
+            saveProgress();
+            showToast('✅ Conexión establecida. Extrayendo bloques...');
+        }
+
+        let isMiningLoopActive = false;
+        function startMiningLoop() {
+            if(isMiningLoopActive) return;
+            isMiningLoopActive = true;
+            
+            if(user && user.isMinerRunning) {
+                document.getElementById('minerActivationOverlay').style.display = 'none';
+            }
+            
+            setInterval(() => {
+                if(!user || !user.isMinerRunning) return; 
+
+                const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
+                const coinConfig = cryptoData[user.activeCoin];
+                
+                if(user.tierId > 1 && user.minerCondition > 0) {
+                    user.minerCondition -= 0.02; 
+                    if(user.minerCondition <= 0) user.minerCondition = 0;
+                }
+
+                const cortex = document.querySelector('.cortex-module');
+                const btnMaint = document.getElementById('btnMaintenance');
+                if(user.minerCondition <= 20 && user.tierId > 1) {
+                    if(cortex) cortex.style.borderColor = 'var(--danger)';
+                    if(btnMaint) btnMaint.style.display = 'block';
+                } else {
+                    if(cortex) cortex.style.borderColor = 'var(--rig-frame)';
+                    if(btnMaint) btnMaint.style.display = 'none';
+                }
+
+                let efficiency = (user.minerCondition === 0 && user.tierId > 1) ? 0.1 : 1;
+
+                let extraBoostMath = 0; 
+                let displayHashExtra = "";
+                
+                const badge = document.getElementById('boostBadge');
+                if(Date.now() < user.boostUntil) {
+                    extraBoostMath = (currentTier.baseBtcPerSec / parseFloat(currentTier.hashrate)) * 1.05;
+                    displayHashExtra = " + 1.05 TH/s";
+                    if(badge) badge.style.display = 'inline';
+                } else {
+                    if(badge) badge.style.display = 'none';
+                }
+
+                let rouletteBoostMath = user.bonusHashrate > 0 ? (currentTier.baseBtcPerSec / parseFloat(currentTier.hashrate)) * user.bonusHashrate : 0;
+                if(user.bonusHashrate > 0) {
+                    displayHashExtra += ` (+${user.bonusHashrate.toFixed(2)} RULETA)`;
+                }
+
+                const hashDisplay = document.getElementById('hashrateDisplay');
+                if(hashDisplay) hashDisplay.innerText = currentTier.hashrate + displayHashExtra;
+
+                user.balances[user.activeCoin] += ((currentTier.baseBtcPerSec + extraBoostMath + rouletteBoostMath) * coinConfig.multiplier * efficiency);
+                
+                const currentBalance = user.balances[user.activeCoin];
+                const currentUSD = currentBalance * coinConfig.price;
+
+                const balEl = document.getElementById('cryptoBalance');
+                const usdEl = document.getElementById('usdBalance');
+                
+                if(balEl) balEl.innerText = currentBalance.toFixed(10); 
+                if(usdEl) usdEl.innerText = currentUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                
+                const pCur = document.getElementById('progCurrent');
+                const pTar = document.getElementById('progTarget');
+                const pFill = document.getElementById('progFill');
+                const targetUSD = getMinWithdrawUSD(user.tierId, user.activeCoin);
+                
+                if(pCur) pCur.innerText = currentUSD.toFixed(2);
+                if(pTar) pTar.innerText = targetUSD.toFixed(2);
+                
+                if(pFill) {
+                    let progressPercent = (currentUSD / targetUSD) * 100;
+                    if(progressPercent > 100) progressPercent = 100;
+                    pFill.style.width = `${progressPercent}%`;
+                }
+
+                const balMiner = document.getElementById('balanceActiveMiner');
+                if(balMiner) balMiner.innerText = currentTier.name;
+                saveProgress();
+            }, 1000);
+
+            setInterval(() => {
+                if(!user) return;
+                const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
+                const randomRot = Math.floor(Math.random() * (currentTier.needleRange[1] - currentTier.needleRange[0])) + currentTier.needleRange[0];
+                const needle = document.getElementById('hMeterNeedleSvg');
+                if(needle) needle.style.transform = `rotate(${randomRot - 90}deg)`;
+            }, 800);
+        }
+
+        const fomoNames = ["0x4A2...8F1", "1Bz8...9Qz", "0x99D...2B4", "T9aR...5Vw", "0x11C...3E3"];
+        let isFomoActive = false;
+        function startFomoSystem() {
+            if(isFomoActive) return;
+            isFomoActive = true;
+            setInterval(() => {
+                if(Math.random() > 0.4) { 
+                    const randomName = fomoNames[Math.floor(Math.random() * fomoNames.length)];
+                    const randomAmt = Math.floor(Math.random() * 80) + 15; 
+                    
+                    const container = document.getElementById('fomo-container');
+                    if(!container) return;
+                    const popup = document.createElement('div');
+                    popup.className = 'fomo-popup';
+                    popup.innerHTML = `<span class="fomo-icon">💸</span> <div><b>Retiro Exitoso</b><br>El usuario ${randomName} acaba de retirar $${randomAmt} USD.</div>`;
+                    
+                    container.appendChild(popup);
+                    setTimeout(() => popup.remove(), 6000);
+                }
+            }, 20000);
+        }
+
+        const canvas = document.getElementById('matrixCanvas'); const ctx = canvas.getContext('2d');
+        const canvasAuth = document.getElementById('coinsCanvasAuth'); const ctxAuth = canvasAuth.getContext('2d');
+
+        let coinsArray = [];
+        const coinSymbols = ['₿', 'Ł', 'Ð', 'ETH', 'USDT'];
+
+        function initCoins() {
+            coinsArray = [];
+            for(let i=0; i<35; i++) {
+                coinsArray.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    size: Math.random() * 25 + 15,
+                    speed: Math.random() * 3 + 1,
+                    symbol: coinSymbols[Math.floor(Math.random() * coinSymbols.length)],
+                    color: Math.random() > 0.3 ? '#f7931a' : '#94a3b8' 
+                });
+            }
+        }
+
+        function resizeCanvas() { 
+            canvas.height = window.innerHeight; canvas.width = window.innerWidth; 
+            canvasAuth.height = window.innerHeight; canvasAuth.width = window.innerWidth; 
+            initCoins();
+        }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+        const characters = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789₿@#$*+-%"; const fontSize = 14; 
+        let columns = canvas.width / fontSize; let drops = Array(Math.floor(columns)).fill(1);
+
+        function drawAnimations() {
+            ctx.fillStyle = "rgba(3, 4, 6, 0.08)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = fontSize + "px monospace"; 
+            const matrixColor = getComputedStyle(document.body).getPropertyValue('--matrix-color').trim();
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                ctx.fillStyle = matrixColor; ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.985) drops[i] = 0;
+                drops[i]++;
+            }
+
+            ctxAuth.clearRect(0, 0, canvasAuth.width, canvasAuth.height);
+            for(let i=0; i<coinsArray.length; i++) {
+                let c = coinsArray[i];
+                ctxAuth.fillStyle = c.color;
+                ctxAuth.font = `bold ${c.size}px Arial`;
+                ctxAuth.shadowBlur = 20;
+                ctxAuth.shadowColor = c.color;
+                ctxAuth.fillText(c.symbol, c.x, c.y);
+                c.y += c.speed;
+                if(c.y > canvasAuth.height) {
+                    c.y = -40;
+                    c.x = Math.random() * canvasAuth.width;
+                }
+            }
+        }
+
+        setInterval(drawAnimations, 50);
+
+        function openReferrals() {
+            if(!user) return;
+            const uidStr = user.idUsuario || (user.uid ? user.uid.slice(0,8).toUpperCase() : "102938");
+            document.getElementById('refUserIdDisplay').innerText = uidStr;
+            
+            const baseUrl = window.location.origin + window.location.pathname;
+            document.getElementById('refLinkInput').value = `${baseUrl}?ref=${uidStr}`;
+            
+            if(!user.referrals) {
+                user.referrals = { lvl1: 0, lvl2: 0, lvl3: 0, earn1: 0, earn2: 0, earn3: 0 };
+            }
+
+            document.getElementById('refCount1').innerText = user.referrals.lvl1;
+            document.getElementById('refCount2').innerText = user.referrals.lvl2;
+            document.getElementById('refCount3').innerText = user.referrals.lvl3;
+            
+            document.getElementById('refEarn1').innerText = `+$${user.referrals.earn1.toFixed(2)}`;
+            document.getElementById('refEarn2').innerText = `+$${user.referrals.earn2.toFixed(2)}`;
+            document.getElementById('refEarn3').innerText = `+$${user.referrals.earn3.toFixed(2)}`;
+
+            const total = user.referrals.earn1 + user.referrals.earn2 + user.referrals.earn3;
+            document.getElementById('refTotalEarn').innerText = `$${total.toFixed(2)} USD`;
+
+            document.getElementById('referralModal').style.display = 'flex';
+        }
+
+        function copyRefLink() {
+            const copyText = document.getElementById("refLinkInput");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); 
+            document.execCommand("copy");
+            showToast("✅ <b>Enlace Copiado</b><br>Compártelo en tus redes sociales para ganar comisiones de red.");
+        }
+
+        function updateCalculator() {
+            if(!user) return;
+            const currentTier = tiers.find(t => t.id === user.tierId) || tiers[0];
+            const coinPrice = cryptoData['BTC'].price; 
+            
+            const dailyBtc = currentTier.baseBtcPerSec * 86400; 
+            const dailyUSD = dailyBtc * coinPrice;
+            const monthlyUSD = dailyUSD * 30;
+
+            document.getElementById('calcMinerName').innerText = currentTier.name;
+            document.getElementById('calcCost').innerText = `$${currentTier.costUSD.toFixed(2)}`;
+            document.getElementById('calcEarnDaily').innerText = `$${dailyUSD.toFixed(2)}`;
+            document.getElementById('calcEarn30').innerText = `$${monthlyUSD.toFixed(2)}`;
+            
+            const roiDays = currentTier.costUSD > 0 ? Math.ceil(currentTier.costUSD / dailyUSD) : "Infinito";
+            const roiColor = roiDays <= 30 ? 'var(--success)' : 'var(--danger)';
+            
+            const roiEl = document.getElementById('calcRoi');
+            roiEl.innerText = currentTier.costUSD === 0 ? "Largo Plazo" : `${roiDays} Días`;
+            roiEl.style.color = currentTier.costUSD === 0 ? 'var(--warning)' : roiColor;
+        }
+
+        const originalActivateTier = activateTier;
+        activateTier = function(tierId) {
+            originalActivateTier(tierId);
+            updateCalculator();
+        };
+
+        function openRoulette() {
+            const now = Date.now();
+            if(now - user.lastSpinDate < 7200000) { 
+                const msLeft = 7200000 - (now - user.lastSpinDate);
+                const hoursLeft = Math.floor(msLeft / 3600000);
+                const minsLeft = Math.ceil((msLeft % 3600000) / 60000);
+                showToast(`⏳ Vuelve en ${hoursLeft}h y ${minsLeft}m para tu próximo giro gratis.`);
+                return;
+            }
+            const btn = document.getElementById('btnSpin');
+            if(btn) {
+                btn.disabled = false;
+                btn.innerText = "TIRAR DE LA RULETA";
+            }
+            document.getElementById('rouletteModal').style.display = 'flex';
+        }
+
+        function spinRoulette() {
+            const wheel = document.getElementById('rouletteWheel');
+            const btn = document.getElementById('btnSpin');
+            if(btn) {
+                btn.disabled = true;
+                btn.innerText = "GIRANDO...";
+            }
+            
+            const stopAngle = 330; 
+            const totalDeg = (360 * 6) + stopAngle; 
+
+            wheel.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.3, 1)';
+            wheel.style.transform = `rotate(${totalDeg}deg)`;
+            
+            setTimeout(() => {
+                user.bonusHashrate += 0.05; 
+                user.lastSpinDate = Date.now();
+                saveProgress();
+                document.getElementById('rouletteModal').style.display = 'none';
+                
+                showToast('🎰 <b>¡Por poco ganas el JackPot!</b><br>Como consuelo has ganado +0.05 TH/s extra permanentes.');
+                
+                wheel.style.transition = 'none'; 
+                wheel.style.transform = `rotate(0deg)`;
+            }, 5200);
+        }
+
+        function repairMiner() {
+            const repairCost = 2; 
+            const currentUSD = user.balances[user.activeCoin] * cryptoData[user.activeCoin].price;
+            if(currentUSD < repairCost) {
+                showToast(`⚠️ Necesitas al menos $2.00 USD minados para hacer mantenimiento.`);
+                return;
+            }
+            user.balances[user.activeCoin] -= (repairCost / cryptoData[user.activeCoin].price);
+            user.minerCondition = 100;
+            saveProgress();
+            showToast('🔧 <b>Mantenimiento Completado</b><br>Tu minero vuelve a operar a su máxima capacidad.');
+        }
+
+        function triggerMoneyRain() {
+            const rc = document.getElementById('moneyRainContainer');
+            if(!rc) return;
+            rc.style.display = 'block';
+            for(let i=0; i<60; i++) {
+                const m = document.createElement('div');
+                m.className = 'money-drop';
+                m.innerText = '💸';
+                m.style.left = Math.random() * 100 + 'vw';
+                m.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                m.style.animationDelay = (Math.random() * 1.5) + 's';
+                rc.appendChild(m);
+            }
+            setTimeout(() => { rc.innerHTML = ''; rc.style.display = 'none'; }, 5000);
+        }
+
+        const originalVerify2FA = verify2FA;
+        verify2FA = function() {
+            originalVerify2FA();
+            setTimeout(() => {
+                if(document.getElementById('tfaArea').style.display === 'none' || document.getElementById('paymentOverlay').style.display === 'none') {
+                    triggerMoneyRain();
+                }
+            }, 500);
+        };
+
+        function startTicker() {
+            const names = ["0x8A2...9B1", "1Cx7...4Fz", "T4aW...1Yq", "0x91D...3A2", "bc1q...m9pz"];
+            const plans = ["ProMiner X", "AntCluster 1200", "Quantum H-Core"];
+            setInterval(() => {
+                const t = document.getElementById('socialTicker');
+                if(!t) return;
+                const rName = names[Math.floor(Math.random() * names.length)];
+                const rPlan = plans[Math.floor(Math.random() * plans.length)];
+                const action = Math.random() > 0.5 ? `acaba de adquirir el plan <b>${rPlan}</b>` : `ha retirado <b>$${Math.floor(Math.random()*80)+15} USD</b> a su billetera`;
+                t.innerHTML = `Usuario ${rName} ${action}.`;
+            }, 8000);
+        }
+
+        startTicker();
+
+        if(!isFirebaseActive) {
+            console.log("Firebase apagado, esperando login mock");
+        }
+    </script>
 </body>
 </html>
