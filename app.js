@@ -9,7 +9,7 @@
             storageBucket: "mineriabtc-b1c78.firebasestorage.app",
             messagingSenderId: "622802944773",
             appId: "1:622802944773:web:242b0036a77f93d3c22d6c"
-        };
+        }; 
         
         let isFirebaseActive = false;
         try {
